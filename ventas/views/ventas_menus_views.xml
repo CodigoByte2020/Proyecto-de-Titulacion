@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="ventas_menu_root"
+              name="Productos"
+              web_icon="ventas,static/description/icon.png"
+              sequence="10"
+    />
+        <menuitem id="ventas_menu"
+                  name="Ventas"
+                  parent="ventas_menu_root"
+                  sequence="10"
+        />
+        <menuitem id="clientes_menu"
+                  name="Clientes"
+                  parent="ventas_menu_root"
+                  sequence="20"
+        />
+</odoo>
