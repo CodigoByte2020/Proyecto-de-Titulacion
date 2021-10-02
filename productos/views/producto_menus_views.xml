@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="productos_menu_root"
+              name="Productos"
+              web_icon="productos,static/description/icon.png"
+              sequence="10"
+    />
+        <menuitem id="producto_menu"
+                  name="Productos"
+                  parent="productos_menu_root"
+                  sequence="10"
+        />
+</odoo>
