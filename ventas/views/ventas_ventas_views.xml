@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="ventas_ventas_view_tree" model="ir.ui.view">
+        <field name="name">ventas.ventas.view.tree</field>
+        <field name="model">ventas.ventas</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="cliente_id"/>
+                <field name="fecha"/>
+                <field name="forma_pago"/>
+                <field name="total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ventas_ventas_view_form" model="ir.ui.view">
+        <field name="name">ventas.ventas.view.form</field>
+        <field name="model">ventas.ventas</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="cliente_id"/>
+                            <field name="usuario_id" string="Vendedor(a)"/>
+                        </group>
+                        <group>
+                            <field name="fecha"/>
+                            <field name="forma_pago"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Líneas de pedido">
+                            <field name="detalle_ventas_ids" context="{'default_venta_id': id}">
+                                <tree editable="bottom">
+                                    <field name="venta_id" invisible="1"/>
+                                    <field name="producto_id"/>
+                                    <field name="cantidad"/>
+                                    <field name="precio"/>
+                                    <field name="subtotal"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group class="oe_subtotal_footer">
+                        <field name="total" class="oe_subtotal_footer_separator"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ventas_ventas_action" model="ir.actions.act_window">
+        <field name="name">Ventas</field>
+        <field name="res_model">ventas.ventas</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="ventas_ventas_menu"
+              name="Ventas"
+              action="ventas_ventas_action"
+              sequence="10"
+              parent="ventas_menu"/>
+</odoo>
