@@ -7,9 +7,13 @@
     'category': 'Tools',
     'version': '13.0.0.0.1',
     'depends': [
-        'productos'
+        'inventario'
     ],
     'data': [
+        'data/ir_sequence_data.xml',
+        'security/ir.model.access.csv',
+        'views/ventas_menus_views.xml',
+        'views/ventas_views.xml'
     ],
     'installable': True,
 }

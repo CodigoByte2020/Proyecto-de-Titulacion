@@ -1,5 +1,3 @@
 id,name,model_id:id,group_id:id,perm_create,perm_read,perm_write,perm_unlink
-access_ventas_credito_cliente,access_ventas_credito_cliente,model_ventas_credito_cliente,base.group_user,1,1,1,1
-access_ventas_pago_credito_cliente,access_ventas_pago_credito_cliente,model_ventas_pago_credito_cliente,base.group_user,1,1,1,1
-access_ventas_detalle_ventas,access_ventas_detalle_ventas,model_ventas_detalle_ventas,base.group_user,1,1,1,1
-access_ventas_ventas,access_ventas_ventas,model_ventas_ventas,base.group_user,1,1,1,1
+access_ventas,access_ventas,model_ventas,base.group_user,1,1,1,1
+access_detalle_ventas,access_detalle_ventas,model_detalle_ventas,base.group_user,1,1,1,1

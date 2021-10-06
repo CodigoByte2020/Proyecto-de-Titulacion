@@ -2,7 +2,7 @@ from odoo import fields, models
 
 
 class Producto(models.Model):
-    _inherit = 'angita_base.producto'
+    _inherit = 'base.producto'
 
     categoria_id = fields.Many2one('inventario.categoria.producto', string='Categoría')
 

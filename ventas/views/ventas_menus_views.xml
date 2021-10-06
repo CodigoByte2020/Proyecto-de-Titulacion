@@ -10,24 +10,14 @@
                   parent="ventas_menu_root"
                   sequence="10"
         />
-        <menuitem id="clientes_menu"
-                  name="Clientes"
-                  parent="ventas_menu_root"
-                  sequence="20"
-        />
-        <menuitem id="creditos_menu"
-                  name="Créditos"
-                  parent="ventas_menu_root"
-                  sequence="30"
-        />
         <menuitem id="reportes_menu"
                   name="Reportes"
                   parent="ventas_menu_root"
-                  sequence="40"
+                  sequence="20"
         />
         <menuitem id="configuracion_menu"
                   name="Configuración"
                   parent="ventas_menu_root"
-                  sequence="50"
+                  sequence="30"
         />
 </odoo>

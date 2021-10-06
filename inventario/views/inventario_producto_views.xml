@@ -44,7 +44,7 @@
               name="Productos"
               action="producto_action"
               sequence="10"
-              parent="producto_menu"/>
+              parent="productos_menu"/>
 
     <!--  CATEGORÍA PRODUCTO  -->
     <record id="categoria_producto_view_tree" model="ir.ui.view">
@@ -84,5 +84,5 @@
               name="Categorías"
               action="categoria_producto_action"
               sequence="20"
-              parent="producto_menu"/>
+              parent="productos_menu"/>
 </odoo>

@@ -1,1 +1,1 @@
-from . import categoria_producto
+from . import producto

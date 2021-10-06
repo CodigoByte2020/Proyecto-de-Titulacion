@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <record id="ventas_ventas_view_tree" model="ir.ui.view">
-        <field name="name">ventas.ventas.view.tree</field>
-        <field name="model">ventas.ventas</field>
+    <record id="ventas_view_tree" model="ir.ui.view">
+        <field name="name">ventas.view.tree</field>
+        <field name="model">ventas</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="cliente_id"/>
+                <field name="usuario_id"/>
                 <field name="fecha"/>
-                <field name="forma_pago"/>
+                <field name="tipo_venta"/>
                 <field name="total"/>
             </tree>
         </field>
     </record>
 
-    <record id="ventas_ventas_view_form" model="ir.ui.view">
-        <field name="name">ventas.ventas.view.form</field>
-        <field name="model">ventas.ventas</field>
+    <record id="ventas_view_form" model="ir.ui.view">
+        <field name="name">ventas.view.form</field>
+        <field name="model">ventas</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
                         <group>
-                            <field name="cliente_id"/>
-                            <field name="usuario_id" string="Vendedor(a)"/>
+                            <field name="usuario_id"/>
+                            <field name="tipo_venta"/>
                         </group>
                         <group>
                             <field name="fecha"/>
-                            <field name="forma_pago"/>
+                            <field name="comentario"/>
                         </group>
                     </group>
                     <notebook>
@@ -50,15 +50,15 @@
         </field>
     </record>
 
-    <record id="ventas_ventas_action" model="ir.actions.act_window">
+    <record id="ventas_action" model="ir.actions.act_window">
         <field name="name">Ventas</field>
-        <field name="res_model">ventas.ventas</field>
+        <field name="res_model">ventas</field>
         <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="ventas_ventas_menu"
               name="Ventas"
-              action="ventas_ventas_action"
+              action="ventas_action"
               sequence="10"
               parent="ventas_menu"/>
 </odoo>
