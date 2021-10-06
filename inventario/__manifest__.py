@@ -12,8 +12,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/inventario_menus_views.xml',
-        'views/inventario_producto_views.xml',
-        'views/inventario_categoria_producto_views.xml',
+        'views/inventario_producto_views.xml'
     ],
     'installable': True,
 }

@@ -7,10 +7,10 @@
     'category': 'Tools',
     'version': '13.0.0.0.1',
     'depends': [
-        'base'
+        'mail'
     ],
     'data': [
         'security/ir.model.access.csv'
     ],
-    'installable': True,
+    'installable': True
 }

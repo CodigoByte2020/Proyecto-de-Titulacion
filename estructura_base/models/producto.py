@@ -6,10 +6,5 @@ class Producto(models.Model):
     _description = 'Productos'
 
     name = fields.Char(string='Nombre', required=True)
-    categoria_id = fields.Many2one('productos.categoria.producto', string='Categoría')
     precio = fields.Float(string='Precio')
-    stock = fields.Integer(string='Stock')
-    comentarios = fields.Text(string='Comentarios')
-
-
-
+    comentario = fields.Text(string='Comentario')

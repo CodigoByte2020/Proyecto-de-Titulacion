@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <menuitem id="productos_menu_root"
-              name="Productos"
+    <menuitem id="inventario_menu_root"
+              name="Inventario"
               web_icon="productos,static/description/icon.png"
               sequence="10"
     />
-        <menuitem id="producto_menu"
+        <menuitem id="productos_menu"
                   name="Productos"
-                  parent="productos_menu_root"
+                  parent="inventario_menu_root"
                   sequence="10"
+        />
+        <menuitem id="movimientos_menu"
+                  name="Movimientos"
+                  parent="inventario_menu_root"
+                  sequence="20"
+        />
+        <menuitem id="ajustes_menu"
+                  name="Ajustes"
+                  parent="inventario_menu_root"
+                  sequence="30"
+        />
+        <menuitem id="reportes_menu"
+                  name="Reportes"
+                  parent="inventario_menu_root"
+                  sequence="40"
         />
 </odoo>
