@@ -1,13 +1,31 @@
 from odoo import api, fields, models
 
+TIPO_DOCUMENTO_SELECTION = [
+    ('dni', 'DOCUMENTO NACIONAL DE IDENTIDAD (DNI)'),
+    ('ce', 'CARNET DE EXTRANJERÍA')
+]
+
 STATE_DEUDA_SELECTION = [
     ('vigente', 'Vigente'),
     ('pagado', 'Pagado')
 ]
 
 
+class Persona(models.Model):
+    _name = 'base.persona'
+    _description = 'Clientes y Proveedores'
+
+    name = fields.Char(string='Nombre', required=True)
+    tipo_documento = fields.Selection(TIPO_DOCUMENTO_SELECTION, string='Tipo de Documento')
+    numero_documento = fields.Char(string='Número de documento')
+    edad = fields.Integer(string='Edad')
+    direccion = fields.Text(string='Dirección')
+    celular = fields.Char(string='Celular')
+    email = fields.Char(string='Email')
+
+
 class CreditoCliente(models.Model):
-    _name = 'ventas.credito.cliente'
+    _name = 'base.credito.cliente'
     _description = 'Crédito de clientes'
 
     name = fields.Char(string='Número', default='/', copy=False)

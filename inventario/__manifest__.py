@@ -1,7 +1,7 @@
 {
-    'name': 'Productos',
-    'summary': 'Módulo de Productos',
-    'description': 'Módulo para la gestión de productos.',
+    'name': 'Inventario',
+    'summary': 'Módulo de Inventario',
+    'description': 'Módulo para la gestión del inventario.',
     'author': 'Contreras Pumamango Gianmarco - gmcontrpuma@gmail.com',
     'website': 'https://github.com/CodigoByte2020',
     'category': 'Tools',
@@ -11,9 +11,9 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'views/producto_menus_views.xml',
-        'views/productos_producto_views.xml',
-        'views/productos_categoria_producto_views.xml',
+        'views/inventario_menus_views.xml',
+        'views/inventario_producto_views.xml',
+        'views/inventario_categoria_producto_views.xml',
     ],
     'installable': True,
 }

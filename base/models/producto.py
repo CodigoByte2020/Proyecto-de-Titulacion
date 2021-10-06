@@ -2,7 +2,7 @@ from odoo import fields, models
 
 
 class Producto(models.Model):
-    _name = 'productos.producto'
+    _name = 'base.producto'
     _description = 'Productos'
 
     name = fields.Char(string='Nombre', required=True)
@@ -10,3 +10,6 @@ class Producto(models.Model):
     precio = fields.Float(string='Precio')
     stock = fields.Integer(string='Stock')
     comentarios = fields.Text(string='Comentarios')
+
+
+
