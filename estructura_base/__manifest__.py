@@ -10,7 +10,8 @@
         'mail'
     ],
     'data': [
-        'security/ir.model.access.csv'
+        'security/ir.model.access.csv',
+        'views/persona_views.xml'
     ],
     'installable': True
 }

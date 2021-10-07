@@ -44,7 +44,7 @@ class Ventas(models.Model):
     #     records = self.env['ventas.detalle.ventas'].search([('venta_id', '=', rec.id)])
     #     for i in records:
     #         total = total + i.subtotal
-    #     rec.update({'total': total})
+    #     rec.write({'total': total})
 
 
 class DetalleVentas(models.Model):

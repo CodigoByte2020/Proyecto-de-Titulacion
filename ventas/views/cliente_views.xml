@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="cliente_view_form" model="ir.ui.view">
+        <field name="name">cliente.view.form</field>
+        <field name="model">base.persona</field>
+        <field name="inherit_id" ref="estructura_base.persona_view_form"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='direccion']" position="before">
+                <field name="tipo" context="{'default_tipo': 'cliente'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="clientes_action" model="ir.actions.act_window">
+        <field name="name">Clientes</field>
+        <field name="res_model">base.persona</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('estructura_base.persona_view_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('cliente_view_form')})]"/>
+    </record>
+
+    <menuitem id="clientes_menu"
+              name="Clientes"
+              action="clientes_action"
+              sequence="20"
+              parent="ventas_menu"/>
+</odoo>

@@ -5,15 +5,20 @@ TIPO_DOCUMENTO_SELECTION = [
     ('ce', 'CARNET DE EXTRANJERÍA')
 ]
 
+TIPO_PERSONA_SELECTION = [
+    ('cliente', 'Cliente'),
+    ('proveedor', 'Proveedor')
+]
+
 
 class Persona(models.Model):
     _name = 'base.persona'
     _description = 'Clientes y Proveedores'
 
     name = fields.Char(string='Nombre', required=True)
+    tipo = fields.Selection(TIPO_PERSONA_SELECTION, string='Tipo')
     tipo_documento = fields.Selection(TIPO_DOCUMENTO_SELECTION, string='Tipo de Documento')
     numero_documento = fields.Char(string='Número de documento')
-    edad = fields.Integer(string='Edad')
     direccion = fields.Text(string='Dirección')
     celular = fields.Char(string='Celular')
     email = fields.Char(string='Email')

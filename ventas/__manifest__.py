@@ -13,7 +13,8 @@
         'data/ir_sequence_data.xml',
         'security/ir.model.access.csv',
         'views/ventas_menus_views.xml',
-        'views/ventas_views.xml'
+        'views/ventas_views.xml',
+        'views/cliente_views.xml'
     ],
     'installable': True,
 }
