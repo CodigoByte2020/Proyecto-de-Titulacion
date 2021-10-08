@@ -1,5 +1,13 @@
 from odoo import api, fields, models
 
+PENDIENTE = 'pending'
+CONFIRMADO = 'confirmed'
+
+STATE_SELECTION = [
+    (PENDIENTE, 'Pendiente'),
+    (CONFIRMADO, 'Confirmado')
+]
+
 TIPO_VENTA_SELECTION = [
     ('contado', 'Contado'),
     ('credito', 'Crédito')
@@ -11,10 +19,21 @@ class Ventas(models.Model):
     _description = 'Registro de ventas'
 
     name = fields.Char(string='Número', default='/', copy=False)
-    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
-    usuario_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
-    tipo_venta = fields.Selection(TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta')
-    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
+    state = fields.Selection(
+        STATE_SELECTION, default=PENDIENTE, string='Estado', states={CONFIRMADO: [('readonly', True)]}
+    )
+    cliente_id = fields.Many2one(
+        'base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
+        states={CONFIRMADO: [('readonly', True)]}
+    )
+    usuario_id = fields.Many2one(
+        'res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True
+    )
+    tipo_venta = fields.Selection(
+        TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta',
+        states={CONFIRMADO: [('readonly', True)]}
+    )
+    fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
     total = fields.Float(compute='_compute_total', store=True, string='Total')
     comentario = fields.Text(string='Comentario')
     detalle_ventas_ids = fields.One2many(
@@ -33,6 +52,12 @@ class Ventas(models.Model):
                 values['name'] = self.env['ir.sequence'].next_by_code(
                     self._name, sequence_date=None) or '/'
         return super(Ventas, self).create(values)
+
+    @api.model
+    def create(self, values):
+        records = values.detalle_ventas_ids
+        for rec in records:
+            print(rec)
 
     @api.depends('detalle_ventas_ids')
     def _compute_total(self):

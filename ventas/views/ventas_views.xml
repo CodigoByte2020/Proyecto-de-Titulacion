@@ -11,6 +11,7 @@
                 <field name="tipo_venta"/>
                 <field name="total"/>
                 <field name="usuario_id"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -20,6 +21,9 @@
         <field name="model">ventas</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed" options="{'clickable': '1'}"/>
+                </header>
                 <sheet>
                     <group>
                         <group>

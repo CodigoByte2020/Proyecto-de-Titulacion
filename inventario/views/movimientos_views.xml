@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="movimientos_view_tree" model="ir.ui.view">
+        <field name="name">movimientos.view.tree</field>
+        <field name="model">movimientos</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="tipo"/>
+                <field name="producto_id"/>
+                <field name="fecha"/>
+                <field name="cantidad"/>
+                <field name="total"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+<!--    <record id="movimientos_view_form" model="ir.ui.view">-->
+<!--        <field name="name">movimientos.view.form</field>-->
+<!--        <field name="model">movimientos</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <form>-->
+<!--                <sheet>-->
+<!--                    <group>-->
+<!--                        <group>-->
+<!--                            <field name="tipo"/>-->
+<!--                            <field name="producto_id"/>-->
+<!--                            <field name="fecha"/>-->
+<!--                        </group>-->
+<!--                        <group>-->
+<!--                            <field name="cantidad"/>-->
+<!--                            <field name="total"/>-->
+<!--                            <field name="user_id"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                </sheet>-->
+<!--            </form>-->
+<!--        </field>-->
+<!--    </record>-->
+
+    <record id="movimientos_action" model="ir.actions.act_window">
+        <field name="name">Movimientos</field>
+        <field name="res_model">movimientos</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="movimientos_movimientos_menu"
+              name="Movimientos"
+              action="movimientos_action"
+              sequence="10"
+              parent="movimientos_menu"/>
+</odoo>

@@ -13,7 +13,8 @@
         'security/ir.model.access.csv',
         'views/inventario_menus_views.xml',
         'views/inventario_producto_views.xml',
-        'views/ajustes_inventario_views.xml'
+        'views/ajustes_inventario_views.xml',
+        'views/movimientos_views.xml'
     ],
     'installable': True,
 }
