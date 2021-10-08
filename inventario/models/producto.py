@@ -12,3 +12,4 @@ class CategoriaProducto(models.Model):
     _description = 'Categoría de productos'
 
     name = fields.Char(string='Nombre', required=True)
+    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)

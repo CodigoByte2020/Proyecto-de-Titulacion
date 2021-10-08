@@ -11,6 +11,7 @@ class Ventas(models.Model):
     _description = 'Registro de ventas'
 
     name = fields.Char(string='Número', default='/', copy=False)
+    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     usuario_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     tipo_venta = fields.Selection(TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta')
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')

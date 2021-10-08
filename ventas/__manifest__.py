@@ -14,7 +14,8 @@
         'security/ir.model.access.csv',
         'views/ventas_menus_views.xml',
         'views/ventas_views.xml',
-        'views/cliente_views.xml'
+        'views/cliente_views.xml',
+        'views/credito_cliente_views.xml'
     ],
     'installable': True,
 }

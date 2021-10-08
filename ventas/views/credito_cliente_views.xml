@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="credito_cliente_view_tree" model="ir.ui.view">
+        <field name="name">credito.cliente.view.tree</field>
+        <field name="model">credito.cliente</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="limite_credito"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="credito_cliente_view_form" model="ir.ui.view">
+        <field name="name">credito.cliente.view.form</field>
+        <field name="model">credito.cliente</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="cliente_id"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="limite_credito"/>
+                            <field name="comentario"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Pagos de crédito">
+                            <field name="pago_credito_clientes_ids" context="{'default_credito_cliente_id': id}">
+                                <tree editable="bottom">
+                                    <field name="credito_cliente_id" invisible="1"/>
+                                    <field name="monto"/>
+                                    <field name="fecha_pago"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="credito_clientes_action" model="ir.actions.act_window">
+        <field name="name">Crédito</field>
+        <field name="res_model">credito.cliente</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="credito_clientes_menu"
+              name="Crédito"
+              action="credito_clientes_action"
+              sequence="30"
+              parent="ventas_menu"/>
+</odoo>

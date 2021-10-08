@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="compras_menu_root"
+              name="Compras"
+              web_icon="compras,static/description/icon.png"
+              sequence="10"
+    />
+        <menuitem id="compras_menu"
+                  name="Compras"
+                  parent="compras_menu_root"
+                  sequence="10"
+        />
+        <menuitem id="reportes_menu"
+                  name="Reportes"
+                  parent="compras_menu_root"
+                  sequence="20"
+        />
+        <menuitem id="configuracion_menu"
+                  name="Configuración"
+                  parent="compras_menu_root"
+                  sequence="30"
+        />
+</odoo>

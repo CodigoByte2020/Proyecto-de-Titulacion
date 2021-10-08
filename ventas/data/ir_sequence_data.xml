@@ -3,7 +3,15 @@
     <record id="ventas_seq" model="ir.sequence">
         <field name="name">Secuencia de Ventas</field>
         <field name="code">ventas</field>
-        <field name="prefix">VENTA-</field>
+        <field name="prefix">VENT-</field>
+        <field name="padding">8</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="creditos_seq" model="ir.sequence">
+        <field name="name">Secuencia de Créditos</field>
+        <field name="code">credito.cliente</field>
+        <field name="prefix">CRED-</field>
         <field name="padding">8</field>
         <field name="company_id" eval="False"/>
     </record>

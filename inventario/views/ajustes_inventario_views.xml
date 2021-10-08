@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="ajustes_inventario_view_tree" model="ir.ui.view">
+        <field name="name">ajustes.inventario.view.tree</field>
+        <field name="model">ajustes.inventario</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ajustes_inventario_view_form" model="ir.ui.view">
+        <field name="name">ajustes.inventario.view.form</field>
+        <field name="model">ajustes.inventario</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    <separator string="Detalles"/>
+                    <field name="detalle_ajuste_inventario_ids" context="{'default_ajuste_inventario_id': id}">
+                        <tree editable="bottom">
+                            <field name="ajuste_inventario_id" invisible="1"/>
+                            <field name="producto_id"/>
+                            <field name="cantidad"/>
+                            <field name="fecha"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ajustes_inventario_action" model="ir.actions.act_window">
+        <field name="name">Inventario</field>
+        <field name="res_model">ajustes.inventario</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="ajustes_inventario_menu"
+              name="Inventario"
+              action="ajustes_inventario_action"
+              sequence="10"
+              parent="ajustes_menu"/>
+</odoo>
