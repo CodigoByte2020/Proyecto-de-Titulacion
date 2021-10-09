@@ -10,7 +10,7 @@
                 <field name="fecha"/>
                 <field name="tipo_venta"/>
                 <field name="total"/>
-                <field name="usuario_id"/>
+                <field name="user_id"/>
                 <field name="state"/>
             </tree>
         </field>
@@ -22,13 +22,15 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed" options="{'clickable': '1'}"/>
+                    <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
+                            attrs="{'invisible': [('state', '=', 'confirmed')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed"/>
                 </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="cliente_id"/>
-                            <field name="usuario_id"/>
+                            <field name="user_id"/>
                             <field name="tipo_venta"/>
                         </group>
                         <group>

@@ -1,7 +1,9 @@
 from odoo import api, fields, models
 
-PENDIENTE = 'pending'
-CONFIRMADO = 'confirmed'
+from odoo.addons.estructura_base.models.constantes import (
+    PENDIENTE,
+    CONFIRMADO
+)
 
 STATE_SELECTION = [
     (PENDIENTE, 'Pendiente'),
@@ -19,14 +21,12 @@ class Ventas(models.Model):
     _description = 'Registro de ventas'
 
     name = fields.Char(string='Número', default='/', copy=False)
-    state = fields.Selection(
-        STATE_SELECTION, default=PENDIENTE, string='Estado', states={CONFIRMADO: [('readonly', True)]}
-    )
+    state = fields.Selection(STATE_SELECTION, default=PENDIENTE, string='Estado')
     cliente_id = fields.Many2one(
         'base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
         states={CONFIRMADO: [('readonly', True)]}
     )
-    usuario_id = fields.Many2one(
+    user_id = fields.Many2one(
         'res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True
     )
     tipo_venta = fields.Selection(
@@ -42,6 +42,10 @@ class Ventas(models.Model):
         string='Líneas de pedido'
     )
 
+    def action_set_confirm(self):
+        self.ensure_one()
+        self.write({'state': CONFIRMADO})
+
     @api.model
     def create(self, values):
         if values.get('name', '/') == '/':
@@ -53,24 +57,21 @@ class Ventas(models.Model):
                     self._name, sequence_date=None) or '/'
         return super(Ventas, self).create(values)
 
-    @api.model
-    def create(self, values):
-        records = values.detalle_ventas_ids
-        for rec in records:
-            print(rec)
-
-    @api.depends('detalle_ventas_ids')
-    def _compute_total(self):
-        for rec in self:
-            total = sum(rec.detalle_ventas_ids.mapped('subtotal'))
-            rec.write({'total': total})
-
+    # Programación Imperativa: Se describe paso a paso.
     # for rec in self:
     #     total = 0
     #     records = self.env['ventas.detalle.ventas'].search([('venta_id', '=', rec.id)])
     #     for i in records:
     #         total = total + i.subtotal
     #     rec.write({'total': total})
+
+    # Programación Declarativa: Se describe el resultado final.
+    # Self es el registro de venta actual
+    @api.depends('detalle_ventas_ids')
+    def _compute_total(self):
+        for rec in self:
+            total = sum(rec.detalle_ventas_ids.mapped('subtotal'))
+            rec.write({'total': total})
 
 
 class DetalleVentas(models.Model):
@@ -88,3 +89,20 @@ class DetalleVentas(models.Model):
         for rec in self:
             if rec.cantidad and rec.precio:
                 rec.write({'subtotal': rec.cantidad * rec.precio})
+
+    def crear_movimientos(self, rec):
+        datos_padre = self.env['ventas'].browse(rec.venta_id.id)
+        diccionario = {
+            'tipo': 'out',
+            'user_id': datos_padre.user_id.id,
+            'fecha': datos_padre.fecha,
+            'producto_id': rec.producto_id.id,
+            'cantidad': rec.cantidad
+        }
+        self.env['movimientos'].create(diccionario)
+
+    @api.model
+    def create(self, values):
+         rec = super(DetalleVentas, self).create(values)
+         self.crear_movimientos(rec)
+         return rec
