@@ -2,13 +2,9 @@ from odoo import api, fields, models
 
 from odoo.addons.estructura_base.models.constantes import (
     PENDIENTE,
-    CONFIRMADO
+    CONFIRMADO,
+    STATE_SELECTION
 )
-
-STATE_SELECTION = [
-    (PENDIENTE, 'Pendiente'),
-    (CONFIRMADO, 'Confirmado')
-]
 
 TIPO_VENTA_SELECTION = [
     ('contado', 'Contado'),
@@ -26,9 +22,7 @@ class Ventas(models.Model):
         'base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
         states={CONFIRMADO: [('readonly', True)]}
     )
-    user_id = fields.Many2one(
-        'res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True
-    )
+    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     tipo_venta = fields.Selection(
         TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta',
         states={CONFIRMADO: [('readonly', True)]}
@@ -45,6 +39,17 @@ class Ventas(models.Model):
     def action_set_confirm(self):
         self.ensure_one()
         self.write({'state': CONFIRMADO})
+        detalle_ventas = self.env['detalle.ventas'].search([('venta_id', '=', self.id)])
+        if detalle_ventas:
+            for rec in detalle_ventas:
+                movimiento = {
+                    'tipo': 'out',
+                    'user_id': self.user_id.id,
+                    'fecha': self.fecha,
+                    'producto_id': rec.producto_id.id,
+                    'cantidad': rec.cantidad
+                }
+                self.env['movimientos'].create(movimiento)
 
     @api.model
     def create(self, values):
@@ -91,15 +96,16 @@ class DetalleVentas(models.Model):
                 rec.write({'subtotal': rec.cantidad * rec.precio})
 
     def crear_movimientos(self, rec):
-        datos_padre = self.env['ventas'].browse(rec.venta_id.id)
-        diccionario = {
-            'tipo': 'out',
-            'user_id': datos_padre.user_id.id,
-            'fecha': datos_padre.fecha,
-            'producto_id': rec.producto_id.id,
-            'cantidad': rec.cantidad
-        }
-        self.env['movimientos'].create(diccionario)
+        venta = self.env['ventas'].search([('id', '=', rec.venta_id.id), ('state', '=', CONFIRMADO)])
+        if venta:
+            movimiento = {
+                'tipo': 'out',
+                'user_id': venta.user_id.id,
+                'fecha': venta.fecha,
+                'producto_id': rec.producto_id.id,
+                'cantidad': rec.cantidad
+            }
+            self.env['movimientos'].create(movimiento)
 
     @api.model
     def create(self, values):

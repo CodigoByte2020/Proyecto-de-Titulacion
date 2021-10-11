@@ -9,7 +9,8 @@
                 <field name="proveedor_id"/>
                 <field name="fecha"/>
                 <field name="total"/>
-                <field name="usuario_id"/>
+                <field name="user_id"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -19,11 +20,16 @@
         <field name="model">compras</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
+                            attrs="{'invisible': [('state', '=', 'confirmed')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="proveedor_id"/>
-                            <field name="usuario_id"/>
+                            <field name="user_id"/>
                         </group>
                         <group>
                             <field name="fecha"/>

@@ -1,13 +1,23 @@
 from odoo import api, fields, models
 
+from odoo.addons.estructura_base.models.constantes import (
+    PENDIENTE,
+    CONFIRMADO,
+    STATE_SELECTION
+)
+
 
 class Compras(models.Model):
     _name = 'compras'
     _description = 'Registro de compras'
 
     name = fields.Char(string='Número', default='/', copy=False)
-    proveedor_id = fields.Many2one('base.persona', string='Proveedor', required=True, domain=[('rango_proveedor', '=', 1)])
-    usuario_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
+    state = fields.Selection(STATE_SELECTION, default=PENDIENTE, string='Estado')
+    proveedor_id = fields.Many2one(
+        'base.persona', string='Proveedor', required=True, domain=[('rango_proveedor', '=', 1)],
+        states={CONFIRMADO: [('readonly', True)]}
+    )
+    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
     total = fields.Float(compute='_compute_total', store=True, string='Total')
     comentario = fields.Text(string='Comentario')
@@ -16,6 +26,21 @@ class Compras(models.Model):
         'compra_id',
         string='Líneas de compra'
     )
+
+    def action_set_confirm(self):
+        self.ensure_one()
+        self.write({'state': CONFIRMADO})
+        detalle_compras = self.env['detalle.compras'].search([('compra_id', '=', self.id)])
+        if detalle_compras:
+            for rec in detalle_compras:
+                movimiento = {
+                    'tipo': 'in',
+                    'user_id': self.user_id.id,
+                    'fecha': self.fecha,
+                    'producto_id': rec.producto_id.id,
+                    'cantidad': rec.cantidad
+                }
+                self.env['movimientos'].create(movimiento)
 
     @api.model
     def create(self, values):
@@ -43,3 +68,22 @@ class DetalleCompras(models.Model):
     producto_id = fields.Many2one('base.producto', string='Producto', required=True)
     cantidad = fields.Float(string='Cantidad')
     subtotal = fields.Float(string='Subtotal')
+
+    def crear_movimientos(self, rec):
+        compra = self.env['compras'].search([('id', '=', rec.compra_id.id), ('state', '=', CONFIRMADO)])
+        if compra:
+            movimiento = {
+                'tipo': 'out',
+                'user_id': compra.user_id.id,
+                'fecha': compra.fecha,
+                'producto_id': rec.producto_id.id,
+                'cantidad': rec.cantidad
+            }
+            self.env['movimientos'].create(movimiento)
+
+    @api.model
+    def create(self, values):
+         rec = super(DetalleCompras, self).create(values)
+         self.crear_movimientos(rec)
+         return rec
+        
