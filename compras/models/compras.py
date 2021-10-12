@@ -33,12 +33,15 @@ class Compras(models.Model):
         detalle_compras = self.env['detalle.compras'].search([('compra_id', '=', self.id)])
         if detalle_compras:
             for rec in detalle_compras:
+                domain = [('producto_id', '=', rec.producto_id.id), ('tipo', 'in', ['in', 'aj'])]
+                movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
                 movimiento = {
                     'tipo': 'in',
                     'user_id': self.user_id.id,
                     'fecha': self.fecha,
                     'producto_id': rec.producto_id.id,
-                    'cantidad': rec.cantidad
+                    'cantidad': rec.cantidad,
+                    'total': rec.cantidad + movimiento_anterior.total if movimiento_anterior else rec.cantidad
                 }
                 self.env['movimientos'].create(movimiento)
 
@@ -72,12 +75,15 @@ class DetalleCompras(models.Model):
     def crear_movimientos(self, rec):
         compra = self.env['compras'].search([('id', '=', rec.compra_id.id), ('state', '=', CONFIRMADO)])
         if compra:
+            domain = [('producto_id', '=', rec.producto_id.id), ('tipo', 'in', ['in', 'aj'])]
+            movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
             movimiento = {
-                'tipo': 'out',
+                'tipo': 'in',
                 'user_id': compra.user_id.id,
                 'fecha': compra.fecha,
                 'producto_id': rec.producto_id.id,
-                'cantidad': rec.cantidad
+                'cantidad': rec.cantidad,
+                'total': rec.cantidad + movimiento_anterior.total if movimiento_anterior else rec.cantidad
             }
             self.env['movimientos'].create(movimiento)
 

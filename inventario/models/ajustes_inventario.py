@@ -49,9 +49,9 @@ class DetalleAjustesInventario(models.Model):
         inventario = self.env['ajustes.inventario'].search(domain)
         if inventario:
             movimiento = {
-                'tipo': 'out',
+                'tipo': 'aj',
                 'user_id': inventario.user_id.id,
-                'fecha': inventario.fecha,
+                'fecha': rec.fecha,
                 'producto_id': rec.producto_id.id,
                 'cantidad': rec.cantidad,
                 'total': rec.cantidad

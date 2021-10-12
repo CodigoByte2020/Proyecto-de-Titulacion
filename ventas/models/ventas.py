@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.estructura_base.models.constantes import (
     PENDIENTE,
@@ -27,7 +28,7 @@ class Ventas(models.Model):
         TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta',
         states={CONFIRMADO: [('readonly', True)]}
     )
-    fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
+    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
     total = fields.Float(compute='_compute_total', store=True, string='Total')
     comentario = fields.Text(string='Comentario')
     detalle_ventas_ids = fields.One2many(
@@ -42,13 +43,22 @@ class Ventas(models.Model):
         detalle_ventas = self.env['detalle.ventas'].search([('venta_id', '=', self.id)])
         if detalle_ventas:
             for rec in detalle_ventas:
-                movimiento = {
-                    'tipo': 'out',
-                    'user_id': self.user_id.id,
-                    'fecha': self.fecha,
-                    'producto_id': rec.producto_id.id,
-                    'cantidad': rec.cantidad
-                }
+                domain = [('producto_id', '=', rec.producto_id.id)]
+                movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
+                if movimiento_anterior:
+                    movimiento = {
+                        'tipo': 'out',
+                        'user_id': self.user_id.id,
+                        'fecha': self.fecha,
+                        'producto_id': rec.producto_id.id,
+                        'cantidad': rec.cantidad,
+                        'total': movimiento_anterior.total - rec.cantidad
+                    }
+                else:
+                    raise ValidationError(
+                        'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'
+                        .format(rec.producto_id.name)
+                    )
                 self.env['movimientos'].create(movimiento)
 
     @api.model
@@ -98,13 +108,22 @@ class DetalleVentas(models.Model):
     def crear_movimientos(self, rec):
         venta = self.env['ventas'].search([('id', '=', rec.venta_id.id), ('state', '=', CONFIRMADO)])
         if venta:
-            movimiento = {
-                'tipo': 'out',
-                'user_id': venta.user_id.id,
-                'fecha': venta.fecha,
-                'producto_id': rec.producto_id.id,
-                'cantidad': rec.cantidad
-            }
+            domain = [('producto_id', '=', rec.producto_id.id)]
+            movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
+            if movimiento_anterior:
+                movimiento = {
+                    'tipo': 'out',
+                    'user_id': venta.user_id.id,
+                    'fecha': venta.fecha,
+                    'producto_id': rec.producto_id.id,
+                    'cantidad': rec.cantidad,
+                    'total': movimiento_anterior.total - rec.cantidad
+                }
+            else:
+                raise ValidationError(
+                    'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'.format(
+                        rec.producto_id.name)
+                )
             self.env['movimientos'].create(movimiento)
 
     @api.model
