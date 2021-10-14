@@ -12,6 +12,11 @@ TIPO_VENTA_SELECTION = [
     ('credito', 'Crédito')
 ]
 
+# Orden de los metodos y su ejecución:
+# 1. Método create del padre
+# 2. Método create del hijo
+# 3. Método en cuestión que ha sido llamado
+
 
 class Ventas(models.Model):
     _name = 'ventas'
@@ -70,18 +75,16 @@ class Ventas(models.Model):
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(
                     self._name, sequence_date=None) or '/'
-        credito = self.env['credito.cliente'].search([('cliente_id', '=', values.get('cliente_id'))])
-        if credito:
-            return super(Ventas, self).create(values)
-        else:
-            raise ValidationError('El cliente no tiene ningun crédito registrado.')
+        return super(Ventas, self).create(values)
 
-    def verificar_credito_cliente(self):
-        # domain = [('cliente_id', '=', self.cliente_id)]
-        credito = self.env['credito.cliente'].search([('cliente_id', '=', self.cliente_id)])
-        return credito
-
-
+    # El constrains es para validar un campo antes de crear el registro o al momento de modificar dicho registro
+    @api.constrains('tipo_venta')
+    def _check_tipo_venta(self):
+        for rec in self:
+            if rec.tipo_venta == 'credito':
+                credito = self.env['credito.cliente'].search([('cliente_id', '=', rec.cliente_id.id)])
+                if not credito:
+                    raise ValidationError('El cliente no tiene ningun crédito registrado.')
 
     # Programación Imperativa: Se describe paso a paso.
     # for rec in self:
@@ -139,6 +142,6 @@ class DetalleVentas(models.Model):
 
     @api.model
     def create(self, values):
-         rec = super(DetalleVentas, self).create(values)
-         self.crear_movimientos(rec)
-         return rec
+        rec = super(DetalleVentas, self).create(values)
+        self.crear_movimientos(rec)
+        return rec

@@ -10,7 +10,6 @@
         'estructura_base'
     ],
     'data': [
-        'data/ir_cron_data.xml',
         'security/ir.model.access.csv',
         'views/inventario_menus_views.xml',
         'views/inventario_producto_views.xml',

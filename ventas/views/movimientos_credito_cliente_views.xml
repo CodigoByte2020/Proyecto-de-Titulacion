@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="movimientos_credito_cliente_view_tree" model="ir.ui.view">
+        <field name="name">movimientos.credito.cliente.view.tree</field>
+        <field name="model">movimientos.credito.cliente</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="tipo"/>
+                <field name="fecha"/>
+                <field name="monto"/>
+                <field name="deuda"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="movimientos_credito_cliente_view_form" model="ir.ui.view">
+        <field name="name">movimientos.credito.cliente.view.form</field>
+        <field name="model">movimientos.credito.cliente</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="tipo"/>
+                            <field name="fecha"/>
+                            <field name="monto"/>
+                        </group>
+                        <group>
+                            <field name="deuda"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="movimientos_credito_cliente_action" model="ir.actions.act_window">
+        <field name="name">Movimientos de Crédito</field>
+        <field name="res_model">movimientos.credito.cliente</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="movimientos_credito_cliente_menu"
+              name="Movimientos de Crédito"
+              action="movimientos_credito_cliente_action"
+              sequence="30"
+              parent="creditos_menu"/>
+</odoo>
