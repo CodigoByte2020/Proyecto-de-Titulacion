@@ -70,7 +70,18 @@ class Ventas(models.Model):
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(
                     self._name, sequence_date=None) or '/'
-        return super(Ventas, self).create(values)
+        credito = self.env['credito.cliente'].search([('cliente_id', '=', values.get('cliente_id'))])
+        if credito:
+            return super(Ventas, self).create(values)
+        else:
+            raise ValidationError('El cliente no tiene ningun crédito registrado.')
+
+    def verificar_credito_cliente(self):
+        # domain = [('cliente_id', '=', self.cliente_id)]
+        credito = self.env['credito.cliente'].search([('cliente_id', '=', self.cliente_id)])
+        return credito
+
+
 
     # Programación Imperativa: Se describe paso a paso.
     # for rec in self:
