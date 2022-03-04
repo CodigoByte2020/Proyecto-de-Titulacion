@@ -4,7 +4,7 @@
         <field name="name">movimientos.view.tree</field>
         <field name="model">movimientos</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree create="0">
                 <field name="tipo"/>
                 <field name="producto_id"/>
                 <field name="fecha"/>
@@ -15,33 +15,33 @@
         </field>
     </record>
 
-    <record id="movimientos_view_form" model="ir.ui.view">
-        <field name="name">movimientos.view.form</field>
-        <field name="model">movimientos</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="tipo"/>
-                            <field name="producto_id"/>
-                            <field name="fecha"/>
-                        </group>
-                        <group>
-                            <field name="cantidad"/>
-                            <field name="total"/>
-                            <field name="user_id"/>
-                        </group>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+<!--    <record id="movimientos_view_form" model="ir.ui.view">-->
+<!--        <field name="name">movimientos.view.form</field>-->
+<!--        <field name="model">movimientos</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <form edit="0" create="0">-->
+<!--                <sheet>-->
+<!--                    <group>-->
+<!--                        <group>-->
+<!--                            <field name="tipo"/>-->
+<!--                            <field name="producto_id"/>-->
+<!--                            <field name="fecha"/>-->
+<!--                        </group>-->
+<!--                        <group>-->
+<!--                            <field name="cantidad"/>-->
+<!--                            <field name="total"/>-->
+<!--                            <field name="user_id"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                </sheet>-->
+<!--            </form>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <record id="movimientos_action" model="ir.actions.act_window">
         <field name="name">Movimientos</field>
         <field name="res_model">movimientos</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree</field>
     </record>
 
     <menuitem id="movimientos_movimientos_menu"

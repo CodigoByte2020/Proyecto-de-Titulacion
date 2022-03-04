@@ -33,12 +33,14 @@ class Ventas(models.Model):
         TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta',
         states={CONFIRMADO: [('readonly', True)]}
     )
-    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
+    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha',
+                            states={CONFIRMADO: [('readonly', True)]})
     total = fields.Float(compute='_compute_total', store=True, string='Total')
     comentario = fields.Text(string='Comentario')
     detalle_ventas_ids = fields.One2many(
         'detalle.ventas',
         'venta_id',
+        states={CONFIRMADO: [('readonly', True)]},
         string='Líneas de pedido'
     )
 
@@ -84,7 +86,7 @@ class Ventas(models.Model):
             if rec.tipo_venta == 'credito':
                 credito = self.env['credito.cliente'].search([('cliente_id', '=', rec.cliente_id.id)])
                 if not credito:
-                    raise ValidationError('El cliente no tiene ningun crédito registrado.')
+                    raise ValidationError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
 
     # Programación Imperativa: Se describe paso a paso.
     # for rec in self:
