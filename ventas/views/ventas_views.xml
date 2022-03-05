@@ -23,8 +23,8 @@
             <form>
                 <header>
                     <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
-                            attrs="{'invisible': [('state', '=', 'confirmed')]}"/>
-                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed"/>
+                            attrs="{'invisible': [('state', '!=', 'pending')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending,confirmed"/>
                 </header>
                 <sheet>
                     <group>

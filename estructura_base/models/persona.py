@@ -1,8 +1,9 @@
 from odoo import api, fields, models
 
 TIPO_DOCUMENTO_SELECTION = [
-    ('dni', 'DOCUMENTO NACIONAL DE IDENTIDAD (DNI)'),
-    ('ce', 'CARNET DE EXTRANJERÍA')
+    ('dni', 'DOCUMENTO NACIONAL DE IDENTIDAD'),
+    ('ce', 'CARNET DE EXTRANJERÍA'),
+    ('ruc', 'REGISTRO ÚNICO DE CONTRIBUYENTES')
 ]
 
 

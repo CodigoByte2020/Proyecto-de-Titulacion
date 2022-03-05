@@ -2,6 +2,7 @@ from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 from odoo.addons.estructura_base.models.constantes import (
+    BORRADOR,
     PENDIENTE,
     CONFIRMADO,
     STATE_SELECTION
@@ -23,7 +24,7 @@ class Ventas(models.Model):
     _description = 'Registro de ventas'
 
     name = fields.Char(string='Número', default='/', copy=False)
-    state = fields.Selection(STATE_SELECTION, default=PENDIENTE, string='Estado')
+    state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
     cliente_id = fields.Many2one(
         'base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
         states={CONFIRMADO: [('readonly', True)]}
@@ -77,9 +78,9 @@ class Ventas(models.Model):
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(
                     self._name, sequence_date=None) or '/'
+        values['state'] = PENDIENTE
         return super(Ventas, self).create(values)
 
-    # El constrains es para validar un campo antes de crear el registro o al momento de modificar dicho registro
     @api.constrains('tipo_venta')
     def _check_tipo_venta(self):
         for rec in self:
@@ -120,30 +121,3 @@ class DetalleVentas(models.Model):
         for rec in self:
             if rec.cantidad and rec.precio:
                 rec.write({'subtotal': rec.cantidad * rec.precio})
-
-    def crear_movimientos(self, rec):
-        venta = self.env['ventas'].search([('id', '=', rec.venta_id.id), ('state', '=', CONFIRMADO)])
-        if venta:
-            domain = [('producto_id', '=', rec.producto_id.id)]
-            movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
-            if movimiento_anterior:
-                movimiento = {
-                    'tipo': 'out',
-                    'user_id': venta.user_id.id,
-                    'fecha': venta.fecha,
-                    'producto_id': rec.producto_id.id,
-                    'cantidad': rec.cantidad,
-                    'total': movimiento_anterior.total - rec.cantidad
-                }
-            else:
-                raise ValidationError(
-                    'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'.format(
-                        rec.producto_id.name)
-                )
-            self.env['movimientos'].create(movimiento)
-
-    @api.model
-    def create(self, values):
-        rec = super(DetalleVentas, self).create(values)
-        self.crear_movimientos(rec)
-        return rec
