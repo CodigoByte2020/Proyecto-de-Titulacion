@@ -113,11 +113,11 @@ class DetalleVentas(models.Model):
     venta_id = fields.Many2one('ventas', string='Venta', required=True)
     producto_id = fields.Many2one('base.producto', string='Producto', required=True)
     cantidad = fields.Float(string='Cantidad')
-    precio = fields.Float(related='producto_id.precio', string='Precio')
+    precio_venta = fields.Float(related='producto_id.precio_venta', string='Precio')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
 
-    @api.depends('cantidad', 'precio')
+    @api.depends('cantidad', 'precio_venta')
     def _compute_subtotal(self):
         for rec in self:
-            if rec.cantidad and rec.precio:
-                rec.write({'subtotal': rec.cantidad * rec.precio})
+            if rec.cantidad and rec.precio_venta:
+                rec.write({'subtotal': rec.cantidad * rec.precio_venta})

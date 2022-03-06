@@ -8,7 +8,6 @@
             <tree>
                 <field name="name"/>
                 <field name="categoria_id"/>
-                <field name="precio"/>
             </tree>
         </field>
     </record>
@@ -23,10 +22,11 @@
                         <group>
                             <field name="name"/>
                             <field name="categoria_id"/>
+                            <field name="comentario"/>
                         </group>
                         <group>
-                            <field name="precio"/>
-                            <field name="comentario"/>
+                            <field name="precio_compra"/>
+                            <field name="precio_venta"/>
                         </group>
                     </group>
                 </sheet>

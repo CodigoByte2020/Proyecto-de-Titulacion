@@ -22,8 +22,8 @@
             <form>
                 <header>
                     <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
-                            attrs="{'invisible': [('state', '=', 'confirmed')]}"/>
-                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed"/>
+                            attrs="{'invisible': [('state', '!=', 'pending')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending,confirmed"/>
                 </header>
                 <sheet>
                     <group>
@@ -43,6 +43,7 @@
                                     <field name="compra_id" invisible="1"/>
                                     <field name="producto_id"/>
                                     <field name="cantidad"/>
+                                    <field name="precio_compra"/>
                                     <field name="subtotal"/>
                                 </tree>
                             </field>

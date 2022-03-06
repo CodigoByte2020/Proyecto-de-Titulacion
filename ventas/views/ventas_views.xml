@@ -45,7 +45,7 @@
                                     <field name="venta_id" invisible="1"/>
                                     <field name="producto_id"/>
                                     <field name="cantidad"/>
-                                    <field name="precio"/>
+                                    <field name="precio_venta"/>
                                     <field name="subtotal"/>
                                 </tree>
                             </field>
