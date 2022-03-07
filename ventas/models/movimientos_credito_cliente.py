@@ -9,8 +9,9 @@ TIPO_MOVIMIENTO_CREDITO_SELECTION = [
 
 class MovimientosCreditoCliente(models.Model):
     _name = 'movimientos.credito.cliente'
+    _rec_name = 'cliente_id'
 
-    name = fields.Char(string='Nombre')
+    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     tipo = fields.Selection(TIPO_MOVIMIENTO_CREDITO_SELECTION, string='Tipo')
     user_id = fields.Many2one('res.users', string='Responsable', readonly=True)
     fecha = fields.Datetime(string='Fecha')

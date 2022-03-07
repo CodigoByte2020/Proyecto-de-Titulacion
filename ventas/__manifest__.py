@@ -17,7 +17,8 @@
         'views/ventas_views.xml',
         'views/cliente_views.xml',
         'views/credito_cliente_views.xml',
-        'views/movimientos_credito_cliente_views.xml'
+        'views/movimientos_credito_cliente_views.xml',
+        'views/credito_alerta_views.xml'
     ],
     'installable': True,
 }

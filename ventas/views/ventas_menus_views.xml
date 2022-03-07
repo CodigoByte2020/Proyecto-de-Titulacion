@@ -25,4 +25,9 @@
                   parent="ventas_menu_root"
                   sequence="40"
         />
+            <menuitem id="configuracion_creditos_menu"
+                      name="Créditos"
+                      parent="configuracion_menu"
+                      sequence="10"
+            />
 </odoo>

@@ -54,7 +54,7 @@ class Ventas(models.Model):
                 domain = [('producto_id', '=', rec.producto_id.id)]
                 movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
                 if movimiento_anterior:
-                    movimiento = {
+                    movimiento_inventario = {
                         'tipo': 'out',
                         'user_id': self.user_id.id,
                         'fecha': self.fecha,
@@ -62,12 +62,24 @@ class Ventas(models.Model):
                         'cantidad': rec.cantidad,
                         'total': movimiento_anterior.total - rec.cantidad
                     }
+                    if self.tipo_venta == 'credito':
+                        movimiento_credito_cliente = {
+                            'credito_cliente_id': self.cliente_id.id,
+                            'tipo': 'sale',
+                            'fecha': self.fecha,
+                            'producto_id': rec.producto_id.id,
+                            'cantidad': rec.cantidad,
+                            'precio': rec.precio_venta,
+                            'monto': rec.subtotal,
+                            'deuda': self.id,
+                            'user_id': self.user_id.id
+                        }
                 else:
                     raise ValidationError(
                         'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'
                         .format(rec.producto_id.name)
                     )
-                self.env['movimientos'].create(movimiento)
+                self.env['movimientos'].create(movimiento_inventario)
 
     @api.model
     def create(self, values):
