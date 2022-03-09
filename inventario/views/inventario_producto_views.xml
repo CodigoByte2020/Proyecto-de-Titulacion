@@ -29,15 +29,52 @@
                             <field name="precio_venta"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Detalles">
+                            <group>
+                                <group>
+                                    <field name="image_1920" string="Imagen" widget="image"
+                                           options="{'size': [300, 200], 'zoom': true, 'preview_image': 'image_1920'}"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="producto_view_kanban" model="ir.ui.view">
+        <field name="name">producto.view.kanban</field>
+        <field name="model">base.producto</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+                            <field name="image_128" widget="image" class="o_kanban_image_fill_left"
+                                   options="{'zoom': true, 'zoom_delay': 1000, 'background': true, 'preventClicks': false}"/>
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <div class="o_kanban_record_title">
+                                            <strong>Nombre: </strong><field name="name"/><br/>
+                                            <strong>Categoría: </strong><field name="categoria_id"/>
+                                        </div>
+                                    </div>
+                               </div>
+                           </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
     <record id="producto_action" model="ir.actions.act_window">
         <field name="name">Productos</field>
         <field name="res_model">base.producto</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,form,kanban</field>
     </record>
 
     <menuitem id="producto_menu"
