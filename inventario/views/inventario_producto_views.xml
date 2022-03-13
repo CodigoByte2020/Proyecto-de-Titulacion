@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <!--  PRODUCTO  -->
+    <record id="producto_view_search" model="ir.ui.view">
+        <field name="name">producto.view.search</field>
+        <field name="model">base.producto</field>
+        <field name="arch" type="xml">
+            <search string="Productos">
+                <field name="name" string="Producto"/>
+                <field name="categoria_id" string="Categoría"/>
+                <filter name="filter_productos_caros_ventas" string="Productos caros" domain="[('precio_venta', '>=', 3.00)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="groupby_categoria" string="Categoría" domain="[]" context="{'group_by': 'categoria_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="producto_view_tree" model="ir.ui.view">
         <field name="name">producto.view.tree</field>
         <field name="model">base.producto</field>
@@ -74,7 +90,10 @@
     <record id="producto_action" model="ir.actions.act_window">
         <field name="name">Productos</field>
         <field name="res_model">base.producto</field>
-        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">
+            {'search_default_groupby_categoria': 1, 'search_default_filter_productos_caros_ventas': 1}
+        </field>
     </record>
 
     <menuitem id="producto_menu"
