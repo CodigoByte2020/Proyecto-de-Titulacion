@@ -46,6 +46,10 @@ class Ventas(models.Model):
     )
 
     def action_set_confirm(self):
+        '''
+        Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.
+        :return:
+        '''
         self.ensure_one()
         self.write({'state': CONFIRMADO})
         detalle_ventas = self.env['detalle.ventas'].search([('venta_id', '=', self.id)])

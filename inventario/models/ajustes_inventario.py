@@ -20,6 +20,12 @@ class AjustesInventario(models.Model):
     )
 
     def action_set_confirm(self):
+        '''
+        Usado para el inventario inicial y crea registro de movimientos para cada una de sus líneas.
+        Las líneas de tipo inventario modifican el total de un producto.
+        Falta definir como hacer cuando queremos modificar el total de un producto en específico, si debemos
+        crear un ajuste de inventario o hacerlo de una manera mas directa. ???
+        '''
         self.ensure_one()
         self.write({'state': CONFIRMADO})
         detalle_inventario = self.env['detalle.ajustes.inventario'].search([('ajuste_inventario_id', '=', self.id)])

@@ -21,8 +21,10 @@ class CreditoCliente(models.Model):
     credito_alerta_id = fields.Many2one('credito.alerta', string='Alerta',
                                         help='Monto para alertar la deuda total del cliente.')
 
-    # Falta validar que sólo se pueda crear un crédito por cliente
-    # OK
+    _sql_constraints = [
+        ('cliente_id', 'UNIQUE(cliente_id)', 'El cliente ya tiene un crédito registrado. !!!')
+    ]
+
     @api.model
     def create(self, values):
         record = super(CreditoCliente, self).create(values)
