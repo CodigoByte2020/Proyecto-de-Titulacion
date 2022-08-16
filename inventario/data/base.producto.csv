@@ -1,0 +1,7 @@
+"id","categoria_id/id","name","precio_compra","precio_venta"
+"base_producto_001","categoria_producto_001","Lays","0.8","1.0"
+"base_producto_002","categoria_producto_001","Chizito","0.7","1.0"
+"base_producto_003","categoria_producto_001","Chesse Tres","0.6","0.8"
+"base_producto_004","categoria_producto_002","Coca Cola 1L","2.5","3.0"
+"base_producto_005","categoria_producto_002","Inca Kola 1L","2.3","3.2"
+"base_producto_006","categoria_producto_002","Pilsen Trujillo","4.50","5.50"

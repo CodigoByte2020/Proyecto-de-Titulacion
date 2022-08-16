@@ -41,8 +41,9 @@
                             <field name="comentario"/>
                         </group>
                         <group>
-                            <field name="precio_compra"/>
-                            <field name="precio_venta"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="precio_compra" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="precio_venta" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                         </group>
                     </group>
                     <notebook>
@@ -105,7 +106,7 @@
     <!--  CATEGORÍA PRODUCTO  -->
     <record id="categoria_producto_view_tree" model="ir.ui.view">
         <field name="name">categoria.producto.view.tree</field>
-        <field name="model">inventario.categoria.producto</field>
+        <field name="model">categoria.producto</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
@@ -115,7 +116,7 @@
 
     <record id="categoria_producto_view_form" model="ir.ui.view">
         <field name="name">categoria.producto.view.form</field>
-        <field name="model">inventario.categoria.producto</field>
+        <field name="model">categoria.producto</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -132,7 +133,7 @@
 
     <record id="categoria_producto_action" model="ir.actions.act_window">
         <field name="name">Categorías</field>
-        <field name="res_model">inventario.categoria.producto</field>
+        <field name="res_model">categoria.producto</field>
         <field name="view_mode">tree,form</field>
     </record>
 

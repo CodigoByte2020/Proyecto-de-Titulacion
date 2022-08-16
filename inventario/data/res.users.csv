@@ -1,0 +1,6 @@
+"id","name","login","groups_id/id"
+"res_user_001","Usuario 1","usuario_1@angita.com","ventas.ventas_group_administrador"
+"res_user_002","Usuario 2","usuario_2@angita.com","ventas.ventas_group_administrador"
+"res_user_003","Usuario 3","usuario_3@angita.com","ventas.ventas_group_vendedor"
+"res_user_004","Usuario 4","usuario_4@angita.com","ventas.ventas_group_vendedor"
+"res_user_005","Usuario 5","usuario_5@angita.com","ventas.ventas_group_vendedor"

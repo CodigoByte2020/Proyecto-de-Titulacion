@@ -11,3 +11,4 @@ class Producto(models.Model):
     precio_venta = fields.Float(string='Precio de venta')
     comentario = fields.Text(string='Comentario',
                              help='Utilize este campo para especificar detalles extras del producto.')
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
