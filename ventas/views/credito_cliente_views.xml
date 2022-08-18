@@ -55,6 +55,7 @@
         <field name="model">pago.credito.cliente</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="name"/>
                 <field name="credito_cliente_id"/>
                 <field name="monto"/>
                 <field name="fecha"/>

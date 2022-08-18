@@ -7,4 +7,12 @@
         <field name="padding">8</field>
         <field name="company_id" eval="False"/>
     </record>
+
+    <record id="pagos_seq" model="ir.sequence">
+        <field name="name">Secuencia de Pagos</field>
+        <field name="code">pagos</field>
+        <field name="prefix">PAGO-</field>
+        <field name="padding">8</field>
+        <field name="company_id" eval="False"/>
+    </record>
 </odoo>

@@ -66,6 +66,7 @@ class Ventas(models.Model):
                         'cantidad': rec.cantidad,
                         'total': movimiento_anterior.total - rec.cantidad
                     }
+                    # TODO: Chekear esta parte del código e implementar la funcionalidad de crédito
                     if self.tipo_venta == 'credito':
                         movimiento_credito_cliente = {
                             'credito_cliente_id': self.cliente_id.id,
@@ -92,8 +93,7 @@ class Ventas(models.Model):
                 values['name'] = self.env['ir.sequence'].with_context(force_company=values['company_id']).next_by_code(
                     self._name, sequence_date=None) or '/'
             else:
-                values['name'] = self.env['ir.sequence'].next_by_code(
-                    self._name, sequence_date=None) or '/'
+                values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
         values['state'] = PENDIENTE
         return super(Ventas, self).create(values)
 
