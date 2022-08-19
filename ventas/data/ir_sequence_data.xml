@@ -10,7 +10,7 @@
 
     <record id="pagos_seq" model="ir.sequence">
         <field name="name">Secuencia de Pagos</field>
-        <field name="code">pagos</field>
+        <field name="code">pago.credito.cliente</field>
         <field name="prefix">PAGO-</field>
         <field name="padding">8</field>
         <field name="company_id" eval="False"/>

@@ -74,14 +74,3 @@ class PagoCreditoCliente(models.Model):
         }
         self.env['movimientos.credito.cliente'].create(movimiento)
         return rec
-
-    # @api.model
-    # def create(self, vals):
-    #     if vals.get('name', '/') == '/':
-    #         if 'company_id' in vals:
-    #             vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
-    #                 'administracion.cartafianza', sequence_date=None) or '/'
-    #         else:
-    #             vals['name'] = self.env['ir.sequence'].next_by_code(
-    #                 'administracion.cartafianza', sequence_date=None) or '/'
-    #         return super(CartaFianza, self).create(vals)

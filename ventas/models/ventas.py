@@ -44,47 +44,46 @@ class Ventas(models.Model):
         states={CONFIRMADO: [('readonly', True)]},
         string='Líneas de pedido'
     )
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
+    '''Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.'''
     def action_set_confirm(self):
-        '''
-        Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.
-        :return:
-        '''
         self.ensure_one()
         self.write({'state': CONFIRMADO})
         detalle_ventas = self.env['detalle.ventas'].search([('venta_id', '=', self.id)])
         if detalle_ventas:
             for rec in detalle_ventas:
-                domain = [('producto_id', '=', rec.producto_id.id)]
-                movimiento_anterior = self.env['movimientos'].search(domain, order='create_date DESC', limit=1)
-                if movimiento_anterior:
-                    movimiento_inventario = {
+                movements_model = self.env['movimientos']
+                last_movement = movements_model.search([('producto_id', '=', rec.producto_id.id)],
+                                                       order='create_date DESC', limit=1)
+                if last_movement:
+                    movements_model.create({
                         'tipo': 'out',
                         'user_id': self.user_id.id,
                         'fecha': self.fecha,
                         'producto_id': rec.producto_id.id,
                         'cantidad': rec.cantidad,
-                        'total': movimiento_anterior.total - rec.cantidad
-                    }
-                    # TODO: Chekear esta parte del código e implementar la funcionalidad de crédito
+                        'total': last_movement.total - rec.cantidad
+                    })
+                    # Cada cliente sólo podrá tener un crédito registrado
                     if self.tipo_venta == 'credito':
-                        movimiento_credito_cliente = {
-                            'credito_cliente_id': self.cliente_id.id,
+                        credit_movement_model = self.env['movimientos.credito.cliente']
+                        domain = [('cliente_id', '=', self.cliente_id.id)]
+                        last_credit_movement = credit_movement_model.search(domain, order='fecha DESC', limit=1)
+                        credit_movement_model.create({
+                            'cliente_id': self.cliente_id.id,
                             'tipo': 'sale',
+                            'user_id': self.user_id.id,
                             'fecha': self.fecha,
-                            'producto_id': rec.producto_id.id,
-                            'cantidad': rec.cantidad,
-                            'precio': rec.precio_venta,
                             'monto': rec.subtotal,
-                            'deuda': self.id,
-                            'user_id': self.user_id.id
-                        }
+                            'deuda': last_credit_movement.deuda + self.total,
+                            'credito_cliente_id': self.env['credito.cliente'].search(domain).id
+                        })
                 else:
                     raise ValidationError(
                         'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'
-                        .format(rec.producto_id.name)
+                            .format(rec.producto_id.name)
                     )
-                self.env['movimientos'].create(movimiento_inventario)
 
     @api.model
     def create(self, values):
@@ -131,6 +130,7 @@ class DetalleVentas(models.Model):
     cantidad = fields.Float(string='Cantidad')
     precio_venta = fields.Float(related='producto_id.precio_venta', string='Precio')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
+    currency_id = fields.Many2one(related='venta_id.currency_id')
 
     @api.depends('cantidad', 'precio_venta')
     def _compute_subtotal(self):
