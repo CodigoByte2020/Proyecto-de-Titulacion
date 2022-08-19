@@ -6,5 +6,5 @@ class CreditoAlerta(models.Model):
     _description = 'Alerta de créditos'
     _rec_name = 'monto'
 
-    monto = fields.Char(string='Monto', required=True)
+    monto = fields.Float(string='Monto', required=True)
     active = fields.Boolean(string='Activo', default=True)

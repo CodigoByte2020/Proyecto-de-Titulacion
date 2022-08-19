@@ -79,11 +79,22 @@ class Ventas(models.Model):
                             'deuda': last_credit_movement.deuda + self.total,
                             'credito_cliente_id': self.env['credito.cliente'].search(domain).id
                         })
+                        # TODO: *******************************************
+                        deuda_total = last_credit_movement.deuda + self.total
+                        if deuda_total > last_credit_movement.credito_cliente_id.credito_alerta_id.monto:
+                            return {
+                                'warning': {
+                                    'title': 'ADVERTENCIA',
+                                    'message': f'El cliente {self.cliente_id.name} ha superado el monto de su crédito'
+                                }
+                            }
+
                 else:
                     raise ValidationError(
                         'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'
                             .format(rec.producto_id.name)
                     )
+
 
     @api.model
     def create(self, values):
