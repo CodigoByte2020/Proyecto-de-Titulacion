@@ -10,6 +10,7 @@ TIPO_MOVIMIENTO_CREDITO_SELECTION = [
 class MovimientosCreditoCliente(models.Model):
     _name = 'movimientos.credito.cliente'
     _rec_name = 'cliente_id'
+    _order = 'fecha asc'
 
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     tipo = fields.Selection(TIPO_MOVIMIENTO_CREDITO_SELECTION, string='Tipo')

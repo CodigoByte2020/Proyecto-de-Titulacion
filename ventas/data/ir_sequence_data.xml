@@ -8,7 +8,7 @@
         <field name="company_id" eval="False"/>
     </record>
 
-    <record id="pagos_seq" model="ir.sequence">
+    <record id="pago_seq" model="ir.sequence">
         <field name="name">Secuencia de Pagos</field>
         <field name="code">pago.credito.cliente</field>
         <field name="prefix">PAGO-</field>

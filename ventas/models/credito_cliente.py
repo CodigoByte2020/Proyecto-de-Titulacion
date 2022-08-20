@@ -20,6 +20,7 @@ class CreditoCliente(models.Model):
     )
     credito_alerta_id = fields.Many2one('credito.alerta', string='Alerta',
                                         help='Monto para alertar la deuda total del cliente.')
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
     _sql_constraints = [
         ('cliente_id', 'UNIQUE(cliente_id)', 'El cliente ya tiene un crédito registrado. !!!')
@@ -50,6 +51,7 @@ class PagoCreditoCliente(models.Model):
     monto = fields.Float(string='Monto')
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
+    currency_id = fields.Many2one(related='credito_cliente_id.currency_id')
 
     @api.model
     def create(self, values):

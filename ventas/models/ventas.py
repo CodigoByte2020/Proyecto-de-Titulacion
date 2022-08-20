@@ -46,55 +46,50 @@ class Ventas(models.Model):
     )
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
-    '''Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.'''
+    '''
+    Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.
+    Crea un registro de movimiento de inventario, por cada línea de venta.
+    Crea un registro de movimiento de crédito de cliente por venta.'''
     def action_set_confirm(self):
         self.ensure_one()
         self.write({'state': CONFIRMADO})
         detalle_ventas = self.env['detalle.ventas'].search([('venta_id', '=', self.id)])
-        if detalle_ventas:
-            for rec in detalle_ventas:
-                movements_model = self.env['movimientos']
-                last_movement = movements_model.search([('producto_id', '=', rec.producto_id.id)],
-                                                       order='create_date DESC', limit=1)
-                if last_movement:
-                    movements_model.create({
-                        'tipo': 'out',
-                        'user_id': self.user_id.id,
-                        'fecha': self.fecha,
-                        'producto_id': rec.producto_id.id,
-                        'cantidad': rec.cantidad,
-                        'total': last_movement.total - rec.cantidad
-                    })
-                    # Cada cliente sólo podrá tener un crédito registrado
-                    if self.tipo_venta == 'credito':
-                        credit_movement_model = self.env['movimientos.credito.cliente']
-                        domain = [('cliente_id', '=', self.cliente_id.id)]
-                        last_credit_movement = credit_movement_model.search(domain, order='fecha DESC', limit=1)
-                        credit_movement_model.create({
-                            'cliente_id': self.cliente_id.id,
-                            'tipo': 'sale',
-                            'user_id': self.user_id.id,
-                            'fecha': self.fecha,
-                            'monto': rec.subtotal,
-                            'deuda': last_credit_movement.deuda + self.total,
-                            'credito_cliente_id': self.env['credito.cliente'].search(domain).id
-                        })
-                        # TODO: *******************************************
-                        deuda_total = last_credit_movement.deuda + self.total
-                        if deuda_total > last_credit_movement.credito_cliente_id.credito_alerta_id.monto:
-                            return {
-                                'warning': {
-                                    'title': 'ADVERTENCIA',
-                                    'message': f'El cliente {self.cliente_id.name} ha superado el monto de su crédito'
-                                }
-                            }
+        for rec in detalle_ventas:
+            movements_model = self.env['movimientos']
+            last_movement = movements_model.search([('producto_id', '=', rec.producto_id.id)],
+                                                   order='create_date DESC', limit=1)
+            if not last_movement:
+                raise ValidationError('No se ha registrado ningúna compra o ajuste de inventario correspondiente al '
+                                      'producto {}'.format(rec.producto_id.name))
+            movements_model.create({
+                'tipo': 'out',
+                'user_id': self.user_id.id,
+                'fecha': self.fecha,
+                'producto_id': rec.producto_id.id,
+                'cantidad': rec.cantidad,
+                'total': last_movement.total - rec.cantidad
+            })
 
-                else:
-                    raise ValidationError(
-                        'No se ha registrado ningúna compra o ajuste de inventario correspondiente al producto {}'
-                            .format(rec.producto_id.name)
-                    )
+        credit_movement_model = self.env['movimientos.credito.cliente']
+        domain = [('cliente_id', '=', self.cliente_id.id)]
+        last_credit_movement = credit_movement_model.search(domain, order='fecha DESC', limit=1)
+        deuda_total = last_credit_movement.deuda + self.total
+        monto = last_credit_movement.credito_cliente_id.credito_alerta_id.monto
 
+        if self.tipo_venta == 'credito' and deuda_total > monto:
+            raise ValidationError(f'El cliente {self.cliente_id.name} tiene un límite de crédito de '
+                                  f'{self.currency_id.symbol} {monto} y este ha sido superado')
+
+        if self.tipo_venta == 'credito':
+            credit_movement_model.create({
+                'cliente_id': self.cliente_id.id,
+                'tipo': 'sale',
+                'user_id': self.user_id.id,
+                'fecha': self.fecha,
+                'monto': self.total,
+                'deuda': deuda_total,
+                'credito_cliente_id': last_credit_movement.credito_cliente_id.id
+            })
 
     @api.model
     def create(self, values):
