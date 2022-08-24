@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+    <record id="persona_view_form_inherit" model="ir.ui.view">
+        <field name="name">persona.view.form.inherit</field>
+        <field name="model">base.persona</field>
+        <field name="inherit_id" ref="estructura_base.persona_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[1]" position="after">
+                <notebook>
+                    <page string="Línea de Crédito">
+                        <button name="calculate_credit" type="object" string="Calcular crédito" class="btn btn-primary"
+                                attrs="{'invisible': [('credito_cliente_id', '=', False)]}"/>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="credito_cliente_id" options="{'currency_field': 'currency_id', 'no_open': True, 'no_create': True}"
+                                   domain="[('cliente_id', '=', id)]"/>
+                            <field name="used_credit" options="{'currency_field': 'currency_id'}"/>
+                            <field name="available_credit" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
     <record id="clientes_action" model="ir.actions.act_window">
         <field name="name">Clientes</field>
         <field name="res_model">base.persona</field>
@@ -8,7 +31,7 @@
         <field name="domain">[('rango_cliente', '=', 1)]</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('estructura_base.persona_view_tree')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('estructura_base.persona_view_form')})]"/>
+            (0, 0, {'view_mode': 'form', 'view_id': ref('ventas.persona_view_form_inherit')})]"/>
     </record>
 
     <menuitem id="clientes_menu"

@@ -11,14 +11,14 @@ class CreditoCliente(models.Model):
         'res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True, store=True
     )
     comentario = fields.Text(string='Comentario')
-    deuda = fields.Float(string='Deuda', required=True)
+    deuda_inicial = fields.Float(string='Deuda inicial')
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
     pago_credito_clientes_ids = fields.One2many(
         'pago.credito.cliente',
         'credito_cliente_id',
         string='Pagos de crédito'
     )
-    credito_alerta_id = fields.Many2one('credito.alerta', string='Alerta',
+    credito_alerta_id = fields.Many2one('credito.alerta', string='Alerta', required=True,
                                         help='Monto para alertar la deuda total del cliente.')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
@@ -33,13 +33,19 @@ class CreditoCliente(models.Model):
             'credito_cliente_id': record.id,
             'tipo': 'customer_credit',
             'fecha': record.fecha,
-            'monto': record.deuda,
-            'deuda': record.deuda,
+            'monto': record.deuda_inicial,
+            'deuda': record.deuda_inicial,
             'user_id': record.user_id.id,
             'cliente_id': record.cliente_id.id
         }
         self.env['movimientos.credito.cliente'].create(movimiento)
         return record
+
+    def name_get(self):
+        result = []
+        for rec in self:
+            result.append((rec.id, f'{self.cliente_id.name} - {self.credito_alerta_id.display_name}'))
+        return result
 
 
 class PagoCreditoCliente(models.Model):

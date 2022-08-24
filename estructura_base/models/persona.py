@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import fields, models
 
 TIPO_DOCUMENTO_SELECTION = [
     ('dni', 'DOCUMENTO NACIONAL DE IDENTIDAD'),
@@ -19,3 +19,4 @@ class Persona(models.Model):
     email = fields.Char(string='Email')
     rango_cliente = fields.Integer(default=0)
     rango_proveedor = fields.Integer(default=0)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
