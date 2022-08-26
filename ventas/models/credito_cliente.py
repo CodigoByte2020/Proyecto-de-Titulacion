@@ -1,5 +1,12 @@
 from odoo import api, fields, models
 
+from odoo.addons.estructura_base.models.constantes import (
+    BORRADOR,
+    PENDIENTE,
+    CONFIRMADO,
+    STATE_SELECTION
+)
+
 
 class CreditoCliente(models.Model):
     _name = 'credito.cliente'
@@ -53,11 +60,18 @@ class PagoCreditoCliente(models.Model):
     _description = 'Pago de crédito de clientes'
 
     name = fields.Char(string='Número', default='/', copy=False)
-    credito_cliente_id = fields.Many2one('credito.cliente', string='Cliente', required=True)
-    monto = fields.Float(string='Monto')
-    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
+    state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
+    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
+                                 states={CONFIRMADO: [('readonly', True)]})
+    # TODO ????????
+    credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', required=True,
+                                         store=True)
+    # credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', required=True)
+    monto = fields.Float(string='Monto', states={CONFIRMADO: [('readonly', True)]})
+    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     currency_id = fields.Many2one(related='credito_cliente_id.currency_id')
+    deuda_actual = fields.Float(string='Deuda actual', readonly=True)
 
     @api.model
     def create(self, values):
@@ -67,18 +81,37 @@ class PagoCreditoCliente(models.Model):
                     self._name, sequence_date=None) or '/'
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
+        values['state'] = PENDIENTE
+        return super(PagoCreditoCliente, self).create(values)
 
-        rec = super(PagoCreditoCliente, self).create(values)
-        domain = [('credito_cliente_id', '=', rec.credito_cliente_id.id)]
+    def action_set_confirm(self):
+        self.ensure_one()
+        self.write({'state': CONFIRMADO})
+        domain = [('credito_cliente_id', '=', self.credito_cliente_id.id)]
         ultimo_movimiento = self.env['movimientos.credito.cliente'].search(domain, order='fecha DESC', limit=1)
         movimiento = {
             'tipo': 'payment',
-            'user_id': rec.user_id.id,
-            'fecha': rec.fecha,
-            'monto': rec.monto,
-            'deuda': ultimo_movimiento.deuda - rec.monto,
-            'credito_cliente_id': rec.credito_cliente_id.id,
-            'cliente_id': rec.credito_cliente_id.cliente_id.id
+            'user_id': self.user_id.id,
+            'fecha': self.fecha,
+            'monto': self.monto,
+            'deuda': ultimo_movimiento.deuda - self.monto,
+            'credito_cliente_id': self.credito_cliente_id.id,
+            'cliente_id': self.credito_cliente_id.cliente_id.id
         }
         self.env['movimientos.credito.cliente'].create(movimiento)
-        return rec
+
+    @api.onchange('credito_cliente_id')
+    def _onchange_deuda_actual(self):
+        if self.credito_cliente_id:
+            deuda = self.env['movimientos.credito.cliente'].search([
+                ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
+            return {'value': {'deuda_actual': deuda}}
+        else:
+            return {'value': {'deuda_actual': False}}
+
+    # TODO: ->>>>> AQUI
+    @api.constrains('monto')
+    def _check_monto(self):
+        for rec in self:
+            if rec.monto > rec.deuda_actual:
+                raise ValueError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')

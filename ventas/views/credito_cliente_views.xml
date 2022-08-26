@@ -61,6 +61,7 @@
                 <field name="monto"/>
                 <field name="fecha"/>
                 <field name="user_id"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -70,11 +71,18 @@
         <field name="model">pago.credito.cliente</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'pending')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending,confirmed"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="currency_id" invisible="1"/>
+                            <field name="cliente_id"/>
                             <field name="credito_cliente_id"/>
+                            <field name="deuda_actual" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="monto" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                         </group>
                         <group>

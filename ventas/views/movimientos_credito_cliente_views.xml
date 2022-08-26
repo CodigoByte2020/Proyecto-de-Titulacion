@@ -28,33 +28,33 @@
         </field>
     </record>
 
-    <record id="movimientos_credito_cliente_view_form" model="ir.ui.view">
-        <field name="name">movimientos.credito.cliente.view.form</field>
-        <field name="model">movimientos.credito.cliente</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="cliente_id"/>
-                            <field name="tipo"/>
-                            <field name="fecha"/>
-                            <field name="monto"/>
-                        </group>
-                        <group>
-                            <field name="deuda"/>
-                            <field name="user_id"/>
-                        </group>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+<!--    <record id="movimientos_credito_cliente_view_form" model="ir.ui.view">-->
+<!--        <field name="name">movimientos.credito.cliente.view.form</field>-->
+<!--        <field name="model">movimientos.credito.cliente</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <form edit="0" create="0">-->
+<!--                <sheet>-->
+<!--                    <group>-->
+<!--                        <group>-->
+<!--                            <field name="cliente_id"/>-->
+<!--                            <field name="tipo"/>-->
+<!--                            <field name="fecha"/>-->
+<!--                            <field name="monto"/>-->
+<!--                        </group>-->
+<!--                        <group>-->
+<!--                            <field name="deuda"/>-->
+<!--                            <field name="user_id"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                </sheet>-->
+<!--            </form>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <record id="movimientos_credito_cliente_action" model="ir.actions.act_window">
         <field name="name">Movimientos de Crédito</field>
         <field name="res_model">movimientos.credito.cliente</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree</field>
         <field name="context">{'search_default_groupby_cliente': 1}</field>
     </record>
 

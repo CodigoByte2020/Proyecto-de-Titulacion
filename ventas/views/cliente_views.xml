@@ -8,11 +8,12 @@
             <xpath expr="//group[1]" position="after">
                 <notebook>
                     <page string="Línea de Crédito">
-                        <button name="calculate_credit" type="object" string="Calcular crédito" class="btn btn-primary"
-                                attrs="{'invisible': [('credito_cliente_id', '=', False)]}"/>
+                        <button name="calculate_credit" type="object" string="Calcular crédito"
+                                class="btn btn-primary"/>
                         <group>
                             <field name="currency_id" invisible="1"/>
-                            <field name="credito_cliente_id" options="{'currency_field': 'currency_id', 'no_open': True, 'no_create': True}"
+                            <field name="credito_cliente_id"
+                                   options="{'currency_field': 'currency_id', 'no_open': True, 'no_create': True}"
                                    domain="[('cliente_id', '=', id)]"/>
                             <field name="used_credit" options="{'currency_field': 'currency_id'}"/>
                             <field name="available_credit" options="{'currency_field': 'currency_id'}"/>
