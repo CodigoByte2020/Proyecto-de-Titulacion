@@ -33,9 +33,17 @@ class CreditoCliente(models.Model):
         ('cliente_id', 'UNIQUE(cliente_id)', 'El cliente ya tiene un crédito registrado. !!!')
     ]
 
+    # Dentro del método create se usa el método update, no se puede utilizar el método create o write
     @api.model
     def create(self, values):
         record = super(CreditoCliente, self).create(values)
+
+        # Actualizamos el campo credito_cliente_id del cliente elegido, recordar que un cliente sólo puede tener un crédito
+        record.cliente_id.update({'credito_cliente_id': record.id})
+
+        # cliente = self.env['base.persona'].browse(record.cliente_id.id)
+        # cliente.update({'credito_cliente_id': record.id})
+
         movimiento = {
             'credito_cliente_id': record.id,
             'tipo': 'customer_credit',
@@ -63,10 +71,7 @@ class PagoCreditoCliente(models.Model):
     state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
                                  states={CONFIRMADO: [('readonly', True)]})
-    # TODO ????????
-    credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', required=True,
-                                         store=True)
-    # credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', required=True)
+    credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', readonly=True)
     monto = fields.Float(string='Monto', states={CONFIRMADO: [('readonly', True)]})
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
@@ -100,18 +105,28 @@ class PagoCreditoCliente(models.Model):
         }
         self.env['movimientos.credito.cliente'].create(movimiento)
 
-    @api.onchange('credito_cliente_id')
-    def _onchange_deuda_actual(self):
-        if self.credito_cliente_id:
-            deuda = self.env['movimientos.credito.cliente'].search([
-                ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
-            return {'value': {'deuda_actual': deuda}}
-        else:
-            return {'value': {'deuda_actual': False}}
+    # @api.onchange('credito_cliente_id')
+    # def _onchange_deuda_actual(self):
+    #     if self.credito_cliente_id:
+    #         deuda = self.env['movimientos.credito.cliente'].search([
+    #             ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
+    #         return {'value': {'deuda_actual': deuda}}
+    #     else:
+    #         return {'value': {'deuda_actual': False}}
 
-    # TODO: ->>>>> AQUI
-    @api.constrains('monto')
-    def _check_monto(self):
-        for rec in self:
-            if rec.monto > rec.deuda_actual:
-                raise ValueError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
+    # TODO: El método se invoca en un pseudo-registro que contiene los valores presentes en el formulario, revisar documentación, PELIGRO ***
+    # @api.onchange('cliente_id')
+    # def _onchange_credito_cliente_id(self):
+    #     if self.cliente_id:
+    #         credito_cliente_id = self.env['credito.cliente'].search([('cliente_id', '=', self.cliente_id.id)]).id
+    #         # self.update({'credito_cliente_id': credito_cliente_id})
+    #         self.credito_cliente_id = credito_cliente_id
+    #     else:
+    #         # self.update({'credito_cliente_id': False})
+    #         self.credito_cliente_id = False
+
+    # @api.constrains('monto')
+    # def _check_monto(self):
+    #     for rec in self:
+    #         if rec.monto > rec.deuda_actual:
+    #             raise ValueError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
