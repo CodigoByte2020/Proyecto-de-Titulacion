@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.estructura_base.models.constantes import (
     BORRADOR,
@@ -13,12 +14,13 @@ class CreditoCliente(models.Model):
     _description = 'Crédito de clientes'
     _rec_name = 'cliente_id'
 
-    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
-    user_id = fields.Many2one(
-        'res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True, store=True
-    )
+    state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
+    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
+                                 states={CONFIRMADO: [('readonly', True)]})
+    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True,
+                              store=True)
     comentario = fields.Text(string='Comentario')
-    deuda_inicial = fields.Float(string='Deuda inicial')
+    deuda_inicial = fields.Float(string='Deuda inicial', states={CONFIRMADO: [('readonly', True)]})
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
     pago_credito_clientes_ids = fields.One2many(
         'pago.credito.cliente',
@@ -36,25 +38,22 @@ class CreditoCliente(models.Model):
     # Dentro del método create se usa el método update, no se puede utilizar el método create o write
     @api.model
     def create(self, values):
-        record = super(CreditoCliente, self).create(values)
+        values['state'] = PENDIENTE
+        return super(CreditoCliente, self).create(values)
 
-        # Actualizamos el campo credito_cliente_id del cliente elegido, recordar que un cliente sólo puede tener un crédito
-        record.cliente_id.update({'credito_cliente_id': record.id})
-
-        # cliente = self.env['base.persona'].browse(record.cliente_id.id)
-        # cliente.update({'credito_cliente_id': record.id})
-
-        movimiento = {
-            'credito_cliente_id': record.id,
+    def action_set_confirm(self):
+        self.ensure_one()
+        self.write({'state': CONFIRMADO})
+        self.cliente_id.update({'credito_cliente_id': self.id})
+        self.env['movimientos.credito.cliente'].create({
+            'credito_cliente_id': self.id,
             'tipo': 'customer_credit',
-            'fecha': record.fecha,
-            'monto': record.deuda_inicial,
-            'deuda': record.deuda_inicial,
-            'user_id': record.user_id.id,
-            'cliente_id': record.cliente_id.id
-        }
-        self.env['movimientos.credito.cliente'].create(movimiento)
-        return record
+            'fecha': self.fecha,
+            'monto': self.deuda_inicial,
+            'deuda': self.deuda_inicial,
+            'user_id': self.user_id.id,
+            'cliente_id': self.cliente_id.id
+        })
 
     def name_get(self):
         result = []
@@ -71,12 +70,14 @@ class PagoCreditoCliente(models.Model):
     state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
                                  states={CONFIRMADO: [('readonly', True)]})
-    credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', readonly=True)
-    monto = fields.Float(string='Monto', states={CONFIRMADO: [('readonly', True)]})
+    # credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', readonly=True)
+    # credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]})
+    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito')
+    monto = fields.Float(string='Monto')
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     currency_id = fields.Many2one(related='credito_cliente_id.currency_id')
-    deuda_actual = fields.Float(string='Deuda actual', readonly=True)
+    deuda_actual = fields.Float(string='Deuda actual', readonly=True, compute='_compute_deuda_actual')
 
     @api.model
     def create(self, values):
@@ -91,6 +92,8 @@ class PagoCreditoCliente(models.Model):
 
     def action_set_confirm(self):
         self.ensure_one()
+        if not self.credito_cliente_id:
+            raise ValidationError(f'El cliente {self.cliente_id.name} no tiene un crédito registrado !!!')
         self.write({'state': CONFIRMADO})
         domain = [('credito_cliente_id', '=', self.credito_cliente_id.id)]
         ultimo_movimiento = self.env['movimientos.credito.cliente'].search(domain, order='fecha DESC', limit=1)
@@ -105,25 +108,46 @@ class PagoCreditoCliente(models.Model):
         }
         self.env['movimientos.credito.cliente'].create(movimiento)
 
-    # @api.onchange('credito_cliente_id')
-    # def _onchange_deuda_actual(self):
-    #     if self.credito_cliente_id:
-    #         deuda = self.env['movimientos.credito.cliente'].search([
-    #             ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
-    #         return {'value': {'deuda_actual': deuda}}
-    #     else:
-    #         return {'value': {'deuda_actual': False}}
+    # @api.depends('cliente_id')
+    # def _compute_credito_cliente_id(self):
+    #     for rec in self:
+    #         if self.cliente_id:
+    #             rec.write({'credito_cliente_id': self.cliente_id.credito_cliente_id.id})
+    #         else:
+    #             rec.write({'credito_cliente_id': False})
 
-    # TODO: El método se invoca en un pseudo-registro que contiene los valores presentes en el formulario, revisar documentación, PELIGRO ***
-    # @api.onchange('cliente_id')
-    # def _onchange_credito_cliente_id(self):
-    #     if self.cliente_id:
-    #         credito_cliente_id = self.env['credito.cliente'].search([('cliente_id', '=', self.cliente_id.id)]).id
-    #         # self.update({'credito_cliente_id': credito_cliente_id})
-    #         self.credito_cliente_id = credito_cliente_id
-    #     else:
-    #         # self.update({'credito_cliente_id': False})
-    #         self.credito_cliente_id = False
+    # Los métodos compute, funcionan a nivel de base de datos
+    # Se le puede asignar a un campo que no sea relacional
+    @api.depends('credito_cliente_id')
+    def _compute_deuda_actual(self):
+        for rec in self:
+            if self.credito_cliente_id:
+                deuda = self.env['movimientos.credito.cliente'].search([
+                    ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
+                rec.write({'deuda_actual': deuda})
+            else:
+                rec.write({'deuda_actual': False})
+
+        # if self.credito_cliente_id:
+        #     deuda = self.env['movimientos.credito.cliente'].search([
+        #         ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
+        #     return {'domain': {'deuda_actual': deuda}}
+        # else:
+        #     return {'domain': {'deuda_actual': False}}
+
+    #El método se invoca en un pseudo-registro que contiene los valores presentes en el formulario, revisar documentación, PELIGRO ***
+    @api.onchange('cliente_id')
+    def _onchange_cliente_id(self):
+        self.update({'credito_cliente_id': False})
+        if self.cliente_id:
+            return {'domain': {'credito_cliente_id': [('cliente_id', '=', self.cliente_id.id)]}}
+        else:
+            return {'domain': {'credito_cliente_id': [('id', '=', -1)]}}
+
+        # if self.cliente_id:
+        #     self.update({'credito_cliente_id': self.cliente_id.credito_cliente_id.id})
+        # else:
+        #     self.update({'credito_cliente_id': False})
 
     # @api.constrains('monto')
     # def _check_monto(self):
