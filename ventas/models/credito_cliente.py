@@ -32,7 +32,7 @@ class CreditoCliente(models.Model):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
     _sql_constraints = [
-        ('cliente_id', 'UNIQUE(cliente_id)', 'El cliente ya tiene un crédito registrado. !!!')
+        ('cliente_id', 'UNIQUE(cliente_id)', 'Este cliente ya tiene un crédito registrado. !!!')
     ]
 
     # Dentro del método create se usa el método update, no se puede utilizar el método create o write
@@ -72,12 +72,12 @@ class PagoCreditoCliente(models.Model):
                                  states={CONFIRMADO: [('readonly', True)]})
     # credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', readonly=True)
     # credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]})
-    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito')
-    monto = fields.Float(string='Monto')
+    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]})
+    monto = fields.Float(string='Monto a pagar', states={CONFIRMADO: [('readonly', True)]})
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     currency_id = fields.Many2one(related='credito_cliente_id.currency_id')
-    deuda_actual = fields.Float(string='Deuda actual', readonly=True, compute='_compute_deuda_actual')
+    deuda_actual = fields.Float(string='Deuda actual', readonly=True, compute='_compute_deuda_actual', store=True)
 
     @api.model
     def create(self, values):
@@ -108,16 +108,8 @@ class PagoCreditoCliente(models.Model):
         }
         self.env['movimientos.credito.cliente'].create(movimiento)
 
-    # @api.depends('cliente_id')
-    # def _compute_credito_cliente_id(self):
-    #     for rec in self:
-    #         if self.cliente_id:
-    #             rec.write({'credito_cliente_id': self.cliente_id.credito_cliente_id.id})
-    #         else:
-    #             rec.write({'credito_cliente_id': False})
-
     # Los métodos compute, funcionan a nivel de base de datos
-    # Se le puede asignar a un campo que no sea relacional
+    # Se puede asignar un valor por defecto a un campo que no sea relacional
     @api.depends('credito_cliente_id')
     def _compute_deuda_actual(self):
         for rec in self:
@@ -128,14 +120,7 @@ class PagoCreditoCliente(models.Model):
             else:
                 rec.write({'deuda_actual': False})
 
-        # if self.credito_cliente_id:
-        #     deuda = self.env['movimientos.credito.cliente'].search([
-        #         ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
-        #     return {'domain': {'deuda_actual': deuda}}
-        # else:
-        #     return {'domain': {'deuda_actual': False}}
-
-    #El método se invoca en un pseudo-registro que contiene los valores presentes en el formulario, revisar documentación, PELIGRO ***
+    #El método se invoca en un pseudo-registro que contiene los valores presentes en el formulario, DOCUMENTACIÓN
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         self.update({'credito_cliente_id': False})
@@ -144,13 +129,8 @@ class PagoCreditoCliente(models.Model):
         else:
             return {'domain': {'credito_cliente_id': [('id', '=', -1)]}}
 
-        # if self.cliente_id:
-        #     self.update({'credito_cliente_id': self.cliente_id.credito_cliente_id.id})
-        # else:
-        #     self.update({'credito_cliente_id': False})
-
-    # @api.constrains('monto')
-    # def _check_monto(self):
-    #     for rec in self:
-    #         if rec.monto > rec.deuda_actual:
-    #             raise ValueError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
+    @api.constrains('monto')
+    def _check_monto(self):
+        for rec in self:
+            if rec.monto > rec.deuda_actual:
+                raise ValidationError(f'El Monto a pagar no puede ser mayor a la Deuda actual')
