@@ -7,7 +7,7 @@
             <search string="Movimientos de Crédito">
                 <field name="cliente_id" string="Cliente"/>
                 <group expand="0" string="Group By">
-                    <filter name="groupby_cliente" string="Cliente" domain="[]" context="{'group_by': 'cliente_id'}"/>
+                    <filter name="group_by_cliente" string="Cliente" domain="[]" context="{'group_by': 'cliente_id'}"/>
                 </group>
             </search>
         </field>
@@ -55,7 +55,7 @@
         <field name="name">Movimientos de Crédito</field>
         <field name="res_model">movimientos.credito.cliente</field>
         <field name="view_mode">tree</field>
-        <field name="context">{'search_default_groupby_cliente': 1}</field>
+        <field name="context">{'search_default_group_by_cliente': 1}</field>
     </record>
 
     <menuitem id="movimientos_credito_cliente_menu"

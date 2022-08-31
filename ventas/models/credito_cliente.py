@@ -27,7 +27,7 @@ class CreditoCliente(models.Model):
         'credito_cliente_id',
         string='Pagos de crédito'
     )
-    credito_alerta_id = fields.Many2one('credito.alerta', string='Alerta', required=True,
+    credito_alerta_id = fields.Many2one('credito.alerta', string='Límite de crédito', required=True,
                                         help='Monto para alertar la deuda total del cliente.')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
@@ -44,7 +44,7 @@ class CreditoCliente(models.Model):
     def action_set_confirm(self):
         self.ensure_one()
         self.write({'state': CONFIRMADO})
-        self.cliente_id.update({'credito_cliente_id': self.id})
+        self.cliente_id.write({'credito_cliente_id': self.id})
         self.env['movimientos.credito.cliente'].create({
             'credito_cliente_id': self.id,
             'tipo': 'customer_credit',
@@ -61,6 +61,12 @@ class CreditoCliente(models.Model):
             result.append((rec.id, f'{self.cliente_id.name} - {self.credito_alerta_id.display_name}'))
         return result
 
+    @api.constrains('deuda_inicial')
+    def _check_deuda_inicial(self):
+        for rec in self:
+            if rec.deuda_inicial > rec.credito_alerta_id.monto:
+                raise ValidationError(f'La Deuda inicial debe ser menor o igual al Límite de crédito !!!')
+
 
 class PagoCreditoCliente(models.Model):
     _name = 'pago.credito.cliente'
@@ -70,9 +76,8 @@ class PagoCreditoCliente(models.Model):
     state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
                                  states={CONFIRMADO: [('readonly', True)]})
-    # credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', readonly=True)
-    # credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]})
-    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]})
+    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]},
+                                         required=True)
     monto = fields.Float(string='Monto a pagar', states={CONFIRMADO: [('readonly', True)]})
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
@@ -92,8 +97,6 @@ class PagoCreditoCliente(models.Model):
 
     def action_set_confirm(self):
         self.ensure_one()
-        if not self.credito_cliente_id:
-            raise ValidationError(f'El cliente {self.cliente_id.name} no tiene un crédito registrado !!!')
         self.write({'state': CONFIRMADO})
         domain = [('credito_cliente_id', '=', self.credito_cliente_id.id)]
         ultimo_movimiento = self.env['movimientos.credito.cliente'].search(domain, order='fecha DESC', limit=1)
@@ -133,4 +136,4 @@ class PagoCreditoCliente(models.Model):
     def _check_monto(self):
         for rec in self:
             if rec.monto > rec.deuda_actual:
-                raise ValidationError(f'El Monto a pagar no puede ser mayor a la Deuda actual')
+                raise ValidationError(f'El Monto a pagar debe ser menor o igual a la Deuda actual !!!')

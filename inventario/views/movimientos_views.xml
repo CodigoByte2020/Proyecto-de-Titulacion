@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+    <record id="movimientos_view_search" model="ir.ui.view">
+        <field name="name">movimientos.view.search</field>
+        <field name="model">movimientos</field>
+        <field name="arch" type="xml">
+            <search string="Movimientos">
+                <field name="tipo"/>
+                <field name="producto_id"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_tipo" string="Tipo" domain="[]" context="{'group_by': 'tipo'}"/>
+                    <filter name="group_by_producto_id" string="Producto" domain="[]" context="{'group_by': 'producto_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="movimientos_view_tree" model="ir.ui.view">
         <field name="name">movimientos.view.tree</field>
         <field name="model">movimientos</field>
@@ -42,6 +57,7 @@
         <field name="name">Movimientos</field>
         <field name="res_model">movimientos</field>
         <field name="view_mode">tree</field>
+        <field name="context">{'search_default_group_by_producto_id': 1}</field>
     </record>
 
     <menuitem id="movimientos_movimientos_menu"

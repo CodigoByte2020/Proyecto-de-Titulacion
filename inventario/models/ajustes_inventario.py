@@ -16,7 +16,8 @@ class AjustesInventario(models.Model):
     detalle_ajuste_inventario_ids = fields.One2many(
         'detalle.ajustes.inventario',
         'ajuste_inventario_id',
-        string='Detalles'
+        string='Detalles',
+        states={CONFIRMADO: [('readonly', True)]}
     )
 
     def action_set_confirm(self):
