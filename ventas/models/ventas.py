@@ -59,8 +59,10 @@ class Ventas(models.Model):
             last_movement = movements_model.search([('producto_id', '=', rec.producto_id.id)],
                                                    order='create_date DESC', limit=1)
             if not last_movement:
-                raise ValidationError('No se ha registrado ningúna compra o ajuste de inventario correspondiente al '
-                                      'producto {}'.format(rec.producto_id.name))
+                # raise ValidationError('No se ha registrado ningúna compra o ajuste de inventario correspondiente al '
+                #                       'producto {}'.format(rec.producto_id.name))
+                raise ValidationError('No se ha registrado ningún ajuste de inventario correspondiente al producto {}'
+                                      .format(rec.producto_id.name))
             movements_model.create({
                 'tipo': 'out',
                 'user_id': self.user_id.id,

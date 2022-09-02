@@ -78,7 +78,7 @@ class PagoCreditoCliente(models.Model):
                                  states={CONFIRMADO: [('readonly', True)]})
     credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]},
                                          required=True)
-    monto = fields.Float(string='Monto a pagar', states={CONFIRMADO: [('readonly', True)]})
+    monto = fields.Float(string='Monto a pagar', states={CONFIRMADO: [('readonly', True)]}, required=True)
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     currency_id = fields.Many2one(related='credito_cliente_id.currency_id')
@@ -116,7 +116,7 @@ class PagoCreditoCliente(models.Model):
     @api.depends('credito_cliente_id')
     def _compute_deuda_actual(self):
         for rec in self:
-            if self.credito_cliente_id:
+            if rec.credito_cliente_id:
                 deuda = self.env['movimientos.credito.cliente'].search([
                     ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
                 rec.write({'deuda_actual': deuda})

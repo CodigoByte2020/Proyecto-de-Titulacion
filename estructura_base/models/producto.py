@@ -7,7 +7,7 @@ class Producto(models.Model):
     _description = 'Productos'
 
     name = fields.Char(string='Nombre', required=True)
-    precio_compra = fields.Float(string='Precio de compra')
+    # precio_compra = fields.Float(string='Precio de compra')
     precio_venta = fields.Float(string='Precio de venta')
     comentario = fields.Text(string='Comentario',
                              help='Utilize este campo para especificar detalles extras del producto.')
