@@ -36,8 +36,10 @@ class Ventas(models.Model):
     )
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha',
                             states={CONFIRMADO: [('readonly', True)]})
+    amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Base imponible')
+    amount_tax = fields.Float(compute='_compute_total', store=True, string='Impuestos')
     total = fields.Float(compute='_compute_total', store=True, string='Total')
-    comentario = fields.Text(string='Comentario')
+    comentarios = fields.Text(string='Comentarios')
     detalle_ventas_ids = fields.One2many(
         'detalle.ventas',
         'venta_id',
@@ -45,6 +47,7 @@ class Ventas(models.Model):
         string='Líneas de pedido'
     )
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    impuesto_id = fields.Many2one('impuesto', string='Impuesto', required=True)
 
     '''
     Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.
@@ -125,8 +128,13 @@ class Ventas(models.Model):
     @api.depends('detalle_ventas_ids')
     def _compute_total(self):
         for rec in self:
-            total = sum(rec.detalle_ventas_ids.mapped('subtotal'))
-            rec.write({'total': total})
+            amount_untaxed = sum(rec.detalle_ventas_ids.mapped('subtotal'))
+            amount_tax = amount_untaxed * self.impuesto_id.amount / 100
+            rec.write({
+                'amount_untaxed': amount_untaxed,
+                'amount_tax': amount_tax,
+                'total': amount_untaxed + amount_tax
+            })
 
 
 class DetalleVentas(models.Model):
@@ -136,7 +144,7 @@ class DetalleVentas(models.Model):
     venta_id = fields.Many2one('ventas', string='Venta', required=True)
     producto_id = fields.Many2one('base.producto', string='Producto', required=True)
     cantidad = fields.Float(string='Cantidad')
-    precio_venta = fields.Float(related='producto_id.precio_venta', string='Precio')
+    precio_venta = fields.Float(related='producto_id.precio_venta', string='Precio unitario')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
 

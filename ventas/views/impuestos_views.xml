@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="impuesto_view_tree" model="ir.ui.view">
+        <field name="name">impuesto.view.tree</field>
+        <field name="model">impuesto</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="amount"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="impuesto_view_form" model="ir.ui.view">
+        <field name="name">impuesto.view.form</field>
+        <field name="model">impuesto</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="impuesto_action" model="ir.actions.act_window">
+        <field name="name">Impuesto</field>
+        <field name="res_model">impuesto</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="impuesto_menu"
+              name="Impuesto"
+              action="impuesto_action"
+              parent="configuracion_menu"
+              sequence="20"
+    />
+</odoo>

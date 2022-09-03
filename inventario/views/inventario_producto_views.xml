@@ -36,6 +36,7 @@
                 <sheet>
                     <group>
                         <group>
+                            <t t-debug="pdb"/>
                             <field name="name"/>
                             <field name="categoria_id"/>
                             <field name="comentario"/>
@@ -66,20 +67,22 @@
         <field name="model">base.producto</field>
         <field name="arch" type="xml">
             <kanban>
+                <field name="stock"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
                             <field name="image_128" widget="image" class="o_kanban_image_fill_left"
                                    options="{'zoom': true, 'zoom_delay': 1000, 'background': true, 'preventClicks': false}"/>
                             <div class="oe_kanban_details">
-                                <div class="o_kanban_record_top">
-                                    <div class="o_kanban_record_headings">
-                                        <div class="o_kanban_record_title">
-                                            <strong>Nombre: </strong><field name="name"/><br/>
-                                            <strong>Categoría: </strong><field name="categoria_id"/>
-                                        </div>
-                                    </div>
-                               </div>
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/><br/>
+                                </strong>
+                                Categoría: <field name="categoria_id"/><br/>
+                                Precio de venta: <field name="precio_venta"/><br/>
+                                Stock:
+<!--                                <span t-attf-style="color: {{'black' if record.stock.raw_value &gt; 0 else 'red'}};">-->
+                                    <field name="stock"/>
+<!--                                </span>-->
                            </div>
                         </div>
                     </t>

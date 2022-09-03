@@ -30,4 +30,5 @@
                       parent="configuracion_menu"
                       sequence="10"
             />
+
 </odoo>
