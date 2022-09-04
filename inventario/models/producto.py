@@ -6,9 +6,9 @@ class Producto(models.Model):
 
     categoria_id = fields.Many2one('categoria.producto', required=True, string='Categoría')
     movimiento_ids = fields.One2many('movimientos', 'producto_id')
-    stock = fields.Float(string='Stock', compute='_compute_stock')
+    stock = fields.Float(string='Stock', compute='_compute_stock', store=True)
 
-    @api.depends('movimiento_ids')
+    @api.depends('movimiento_ids.total')
     def _compute_stock(self):
         for rec in self:
             rec.stock = self.env['movimientos'].search([('producto_id', '=', rec.id)], order='fecha DESC', limit=1).total

@@ -13,7 +13,8 @@ class Movimientos(models.Model):
 
     tipo = fields.Selection(TIPO_MOVIMIENTO_SELECTION, string='Tipo')
     user_id = fields.Many2one('res.users', string='Responsable', readonly=True)
-    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
+    # fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
+    fecha = fields.Datetime(string='Fecha')
     producto_id = fields.Many2one('base.producto')
     cantidad = fields.Float(string='Cantidad')
     total = fields.Float(string='Total')

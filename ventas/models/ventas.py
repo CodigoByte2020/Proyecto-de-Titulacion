@@ -1,3 +1,4 @@
+import datetime
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -69,7 +70,7 @@ class Ventas(models.Model):
             movements_model.create({
                 'tipo': 'out',
                 'user_id': self.user_id.id,
-                'fecha': self.fecha,
+                'fecha': datetime.datetime.now(),
                 'producto_id': rec.producto_id.id,
                 'cantidad': rec.cantidad,
                 'total': last_movement.total - rec.cantidad

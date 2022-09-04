@@ -1,3 +1,4 @@
+import datetime
 from odoo import api, fields, models
 
 from odoo.addons.estructura_base.models.constantes import (
@@ -19,6 +20,7 @@ class AjustesInventario(models.Model):
         string='Detalles',
         states={CONFIRMADO: [('readonly', True)]}
     )
+    fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
 
     def action_set_confirm(self):
         '''
@@ -29,18 +31,15 @@ class AjustesInventario(models.Model):
         '''
         self.ensure_one()
         self.write({'state': CONFIRMADO})
-        detalle_inventario = self.env['detalle.ajustes.inventario'].search([('ajuste_inventario_id', '=', self.id)])
-        if detalle_inventario:
-            for rec in detalle_inventario:
-                movimiento = {
-                    'tipo': 'aj',
-                    'user_id': self.user_id.id,
-                    'fecha': rec.fecha,
-                    'producto_id': rec.producto_id.id,
-                    'cantidad': rec.cantidad,
-                    'total': rec.cantidad
-                }
-                self.env['movimientos'].create(movimiento)
+        for rec in self.detalle_ajuste_inventario_ids:
+            self.env['movimientos'].create({
+                'tipo': 'aj',
+                'user_id': self.user_id.id,
+                'fecha': datetime.datetime.now(),
+                'producto_id': rec.producto_id.id,
+                'cantidad': rec.cantidad,
+                'total': rec.cantidad
+            })
 
 
 class DetalleAjustesInventario(models.Model):
@@ -48,25 +47,23 @@ class DetalleAjustesInventario(models.Model):
 
     producto_id = fields.Many2one('base.producto', string='Producto', required=True)
     cantidad = fields.Float(string='Cantidad')
-    fecha = fields.Date(default=fields.Date.today(), string='Fecha')
     ajuste_inventario_id = fields.Many2one('ajustes.inventario', string='Ajuste inventario')
 
     def crear_movimientos(self, rec):
         domain = [('id', '=', rec.ajuste_inventario_id.id), ('state', '=', CONFIRMADO)]
         inventario = self.env['ajustes.inventario'].search(domain)
         if inventario:
-            movimiento = {
+            self.env['movimientos'].create({
                 'tipo': 'aj',
                 'user_id': inventario.user_id.id,
                 'fecha': rec.fecha,
                 'producto_id': rec.producto_id.id,
                 'cantidad': rec.cantidad,
                 'total': rec.cantidad
-            }
-            self.env['movimientos'].create(movimiento)
+            })
 
     @api.model
     def create(self, values):
-         rec = super(DetalleAjustesInventario, self).create(values)
-         self.crear_movimientos(rec)
-         return rec
+        rec = super(DetalleAjustesInventario, self).create(values)
+        self.crear_movimientos(rec)
+        return rec
