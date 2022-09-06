@@ -13,6 +13,6 @@ class Persona(models.Model):
             ('cliente_id', '=', self.id)], order='fecha DESC', limit=1).deuda
         self.write({
             'used_credit': deuda if self.credito_cliente_id else False,
-            'available_credit': self.credito_cliente_id.credito_alerta_id.monto - deuda
-            if self.credito_cliente_id else False
+            'available_credit':
+                self.credito_cliente_id.credito_alerta_id.monto - deuda if self.credito_cliente_id else False
         })

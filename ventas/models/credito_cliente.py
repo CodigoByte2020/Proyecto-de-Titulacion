@@ -1,3 +1,5 @@
+import datetime
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -21,7 +23,7 @@ class CreditoCliente(models.Model):
                               store=True)
     comentario = fields.Text(string='Comentario')
     deuda_inicial = fields.Float(string='Deuda inicial', states={CONFIRMADO: [('readonly', True)]})
-    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
+    fecha = fields.Datetime(default=fields.Date.today(), string='Fecha')
     pago_credito_clientes_ids = fields.One2many(
         'pago.credito.cliente',
         'credito_cliente_id',
@@ -48,7 +50,7 @@ class CreditoCliente(models.Model):
         self.env['movimientos.credito.cliente'].create({
             'credito_cliente_id': self.id,
             'tipo': 'customer_credit',
-            'fecha': self.fecha,
+            'fecha': datetime.datetime.now(),
             'monto': self.deuda_inicial,
             'deuda': self.deuda_inicial,
             'user_id': self.user_id.id,
@@ -58,7 +60,7 @@ class CreditoCliente(models.Model):
     def name_get(self):
         result = []
         for rec in self:
-            result.append((rec.id, f'{self.cliente_id.name} - {self.credito_alerta_id.display_name}'))
+            result.append((rec.id, f'{rec.cliente_id.name} - {rec.credito_alerta_id.display_name}'))
         return result
 
     @api.constrains('deuda_inicial')
@@ -76,7 +78,7 @@ class PagoCreditoCliente(models.Model):
     state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
                                  states={CONFIRMADO: [('readonly', True)]})
-    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', states={CONFIRMADO: [('readonly', True)]},
+    credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', store=True,
                                          required=True)
     monto = fields.Float(string='Monto a pagar', states={CONFIRMADO: [('readonly', True)]}, required=True)
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
@@ -103,7 +105,7 @@ class PagoCreditoCliente(models.Model):
         movimiento = {
             'tipo': 'payment',
             'user_id': self.user_id.id,
-            'fecha': self.fecha,
+            'fecha': datetime.datetime.now(),
             'monto': self.monto,
             'deuda': ultimo_movimiento.deuda - self.monto,
             'credito_cliente_id': self.credito_cliente_id.id,
@@ -118,19 +120,19 @@ class PagoCreditoCliente(models.Model):
         for rec in self:
             if rec.credito_cliente_id:
                 deuda = self.env['movimientos.credito.cliente'].search([
-                    ('credito_cliente_id', '=', self.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
+                    ('credito_cliente_id', '=', rec.credito_cliente_id.id)], order='fecha DESC', limit=1).deuda
                 rec.write({'deuda_actual': deuda})
             else:
                 rec.write({'deuda_actual': False})
 
     #El método se invoca en un pseudo-registro que contiene los valores presentes en el formulario, DOCUMENTACIÓN
-    @api.onchange('cliente_id')
-    def _onchange_cliente_id(self):
-        self.update({'credito_cliente_id': False})
-        if self.cliente_id:
-            return {'domain': {'credito_cliente_id': [('cliente_id', '=', self.cliente_id.id)]}}
-        else:
-            return {'domain': {'credito_cliente_id': [('id', '=', -1)]}}
+    # @api.onchange('cliente_id')
+    # def _onchange_cliente_id(self):
+    #     self.update({'credito_cliente_id': False})
+    #     if self.cliente_id:
+    #         return {'domain': {'credito_cliente_id': [('cliente_id', '=', self.cliente_id.id)]}}
+    #     else:
+    #         return {'domain': {'credito_cliente_id': [('id', '=', -1)]}}
 
     @api.constrains('monto')
     def _check_monto(self):

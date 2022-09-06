@@ -35,10 +35,46 @@
                         </group>
                         <group>
                             <field name="user_id"/>
-                            <field name="fecha" readonly="1"/>
+                            <field name="fecha" readonly="1" widget="date"/>
                             <field name="comentario"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Pagos de Crédito">
+                            <field name="pago_credito_clientes_ids" context="{'default_credito_cliente_id': id}" readonly="1">
+                                <tree>
+                                    <field name="credito_cliente_id" invisible="1"/>
+                                    <field name="name"/>
+                                    <field name="monto"/>
+                                    <field name="fecha"/>
+                                    <field name="user_id"/>
+                                    <field name="state"/>
+                                </tree>
+<!--                                <form>-->
+<!--                                    <header>-->
+<!--                                        <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"-->
+<!--                                                attrs="{'invisible': [('state', '!=', 'pending')]}"/>-->
+<!--                                        <field name="state" widget="statusbar" statusbar_visible="draft,pending,confirmed"/>-->
+<!--                                    </header>-->
+<!--                                    <sheet>-->
+<!--                                        <group>-->
+<!--                                            <group>-->
+<!--                                                <field name="currency_id" invisible="1"/>-->
+<!--&lt;!&ndash;                                                <field name="credito_cliente_id" options="{'no_open': True, 'no_create_edit': True}"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                <field name="cliente_id" readonly="1"/>&ndash;&gt;-->
+<!--                                                <field name="monto" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                                                <field name="deuda_actual" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+<!--                                            </group>-->
+<!--                                            <group>-->
+<!--                                                <field name="fecha"/>-->
+<!--                                                <field name="user_id"/>-->
+<!--                                            </group>-->
+<!--                                        </group>-->
+<!--                                    </sheet>-->
+<!--                                </form>-->
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
