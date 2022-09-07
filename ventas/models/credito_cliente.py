@@ -76,10 +76,9 @@ class PagoCreditoCliente(models.Model):
 
     name = fields.Char(string='Número', default='/', copy=False)
     state = fields.Selection(STATE_SELECTION, default=BORRADOR, string='Estado')
-    cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
-                                 states={CONFIRMADO: [('readonly', True)]})
-    credito_cliente_id = fields.Many2one(related='cliente_id.credito_cliente_id', string='Crédito', store=True,
-                                         required=True)
+    # cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)],
+    #                              states={CONFIRMADO: [('readonly', True)]})
+    credito_cliente_id = fields.Many2one('credito.cliente', string='Crédito', required=True)
     monto = fields.Float(string='Monto a pagar', states={CONFIRMADO: [('readonly', True)]}, required=True)
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha', readonly=True)
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
