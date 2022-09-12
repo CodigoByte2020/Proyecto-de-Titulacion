@@ -1,5 +1,6 @@
 import re
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 TIPO_DOCUMENTO_SELECTION = [
     ('dni', 'DOCUMENTO NACIONAL DE IDENTIDAD'),
@@ -31,11 +32,12 @@ class Persona(models.Model):
         if self.tipo_documento:
             return {'value': {'numero_documento': False}}
 
-    @api.onchange('numero_documento')
-    def _onchange_numero_documento(self):
-        if self.numero_documento and self.tipo_documento == 'dni' and not dni_validator.match(self.numero_documento):
-            return {'warning': {'title': 'ERROR', 'message': 'El Número de documento debe tener 8 dígitos.'}}
-        elif self.numero_documento and self.tipo_documento == 'ce' and not ce_validator.match(self.numero_documento):
-            return {'warning': {'title': 'ERROR', 'message': 'El Número de documento debe tener 9 dígitos.'}}
-        elif self.numero_documento and self.tipo_documento == 'ruc' and not ruc_validator.match(self.numero_documento):
-            return {'warning': {'title': 'ERROR', 'message': 'El Número de documento debe tener 11 dígitos.'}}
+    @api.constrains('numero_documento')
+    def _check_numero_documento(self):
+        for rec in self:
+            if rec.tipo_documento == 'dni' and not dni_validator.match(rec.numero_documento):
+                raise ValidationError('El número de documento debe tener 8 números.')
+            elif rec.tipo_documento == 'ce' and not ce_validator.match(rec.numero_documento):
+                raise ValidationError('El número de documento debe tener 9 números.')
+            elif rec.tipo_documento == 'ruc' and not ruc_validator.match(rec.numero_documento):
+                raise ValidationError('El número de documento debe tener 11 números.')
