@@ -24,6 +24,7 @@
                   name="Configuración"
                   parent="ventas_menu_root"
                   sequence="40"
+                  groups="estructura_base.estructura_base_group_administrador"
         />
             <menuitem id="configuracion_creditos_menu"
                       name="Créditos"

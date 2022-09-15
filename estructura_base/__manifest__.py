@@ -10,6 +10,7 @@
         'mail'
     ],
     'data': [
+        'security/estructura_base_groups.xml',
         'security/ir.model.access.csv',
         'views/persona_views.xml'
     ],

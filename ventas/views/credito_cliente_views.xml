@@ -90,7 +90,9 @@
               name="Créditos"
               action="credito_clientes_action"
               sequence="10"
-              parent="creditos_menu"/>
+              parent="creditos_menu"
+              groups="estructura_base.estructura_base_group_administrador"
+    />
 
 <!--  PAGO DE CŔEDITOS  -->
     <record id="pago_credito_cliente_view_tree" model="ir.ui.view">
@@ -147,5 +149,7 @@
               name="Pagos de Crédito"
               action="pago_credito_cliente_action"
               sequence="20"
-              parent="creditos_menu"/>
+              parent="creditos_menu"
+              groups="estructura_base.estructura_base_group_administrador"
+    />
 </odoo>

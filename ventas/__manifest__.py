@@ -11,7 +11,6 @@
     ],
     'data': [
         'data/ir_sequence_data.xml',
-        'security/ventas_groups.xml',
         'security/ir.model.access.csv',
         'views/ventas_menus_views.xml',
         'views/ventas_views.xml',

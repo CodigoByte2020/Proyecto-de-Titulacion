@@ -19,6 +19,7 @@
                   name="Ajustes"
                   parent="inventario_menu_root"
                   sequence="30"
+                  groups="estructura_base.estructura_base_group_administrador"
         />
         <menuitem id="reportes_menu"
                   name="Reportes"

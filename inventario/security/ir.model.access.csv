@@ -1,5 +1,7 @@
 id,name,model_id:id,group_id:id,perm_create,perm_read,perm_write,perm_unlink
-access_categoria_producto,access_categoria_producto,model_categoria_producto,base.group_user,1,1,1,1
 access_ajustes_inventario,access_ajustes_inventario,model_ajustes_inventario,base.group_user,1,1,1,1
 access_detalle_ajustes_inventario,access_detalle_ajustes_inventario,model_detalle_ajustes_inventario,base.group_user,1,1,1,1
 access_movimientos,access_movimientos,model_movimientos,base.group_user,1,1,1,1
+
+access_categoria_producto_administrador,access_categoria_producto,model_categoria_producto,estructura_base.estructura_base_group_administrador,1,1,1,1
+access_categoria_producto_vendedor,access_categoria_producto,model_categoria_producto,estructura_base.estructura_base_group_vendedor,0,1,0,0
