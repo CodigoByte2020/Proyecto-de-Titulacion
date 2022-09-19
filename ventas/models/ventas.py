@@ -48,7 +48,7 @@ class Ventas(models.Model):
         string='Líneas de pedido'
     )
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
-    impuesto_id = fields.Many2one('impuesto', string='Impuesto', required=True)
+    # impuesto_id = fields.Many2one('impuesto', string='Impuesto', required=True)
 
     '''
     Busca el último movimiento registrado que pertenezca al producto en cuestión, para calcular el total.
@@ -130,7 +130,7 @@ class Ventas(models.Model):
     def _compute_total(self):
         for rec in self:
             amount_untaxed = sum(rec.detalle_ventas_ids.mapped('subtotal'))
-            amount_tax = amount_untaxed * self.impuesto_id.amount / 100
+            amount_tax = amount_untaxed * 0.18
             rec.write({
                 'amount_untaxed': amount_untaxed,
                 'amount_tax': amount_tax,

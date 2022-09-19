@@ -12,3 +12,7 @@ class Producto(models.Model):
     comentario = fields.Text(string='Comentario',
                              help='Utilize este campo para especificar detalles extras del producto.')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'El Nombre ya existe !'),
+    ]
