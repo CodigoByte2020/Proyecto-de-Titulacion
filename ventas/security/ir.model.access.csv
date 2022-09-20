@@ -5,4 +5,3 @@ access_credito_cliente,access_credito_cliente,model_credito_cliente,base.group_u
 access_pago_credito_cliente,access_pago_credito_cliente,model_pago_credito_cliente,base.group_user,1,1,1,1
 access_movimientos_credito_cliente,access_movimientos_credito_cliente,model_movimientos_credito_cliente,base.group_user,1,1,1,1
 access_credito_alerta,access_credito_alerta,model_credito_alerta,base.group_user,1,1,1,1
-access_impuesto,access_impuesto,model_impuesto,base.group_user,1,1,1,1

@@ -38,7 +38,7 @@ class Ventas(models.Model):
     fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha',
                             states={CONFIRMADO: [('readonly', True)]})
     amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Base imponible')
-    amount_tax = fields.Float(compute='_compute_total', store=True, string='Impuestos')
+    amount_tax = fields.Float(compute='_compute_total', store=True, string='Impuestos - 18%')
     total = fields.Float(compute='_compute_total', store=True, string='Total')
     comentarios = fields.Text(string='Comentarios')
     detalle_ventas_ids = fields.One2many(
