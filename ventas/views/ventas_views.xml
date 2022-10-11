@@ -29,7 +29,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="cliente_id" options="{'no_open': True, 'no_create_edit': True}"/>
+                            <field name="cliente_id" options="{'no_open': True, 'no_create': True}"/>
                             <field name="user_id"/>
                             <field name="tipo_venta"/>
                         </group>

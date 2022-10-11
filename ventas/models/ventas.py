@@ -35,8 +35,9 @@ class Ventas(models.Model):
         TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta',
         states={CONFIRMADO: [('readonly', True)]}
     )
-    fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha',
-                            states={CONFIRMADO: [('readonly', True)]})
+    # fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha',
+    #                         states={CONFIRMADO: [('readonly', True)]})
+    fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
     amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Base imponible')
     amount_tax = fields.Float(compute='_compute_total', store=True, string='Impuestos - 18%')
     total = fields.Float(compute='_compute_total', store=True, string='Total')
@@ -91,7 +92,7 @@ class Ventas(models.Model):
                 'cliente_id': self.cliente_id.id,
                 'tipo': 'sale',
                 'user_id': self.user_id.id,
-                'fecha': self.fecha,
+                'fecha': datetime.datetime.now(),
                 'monto': self.total,
                 'deuda': deuda_total,
                 'credito_cliente_id': last_credit_movement.credito_cliente_id.id
