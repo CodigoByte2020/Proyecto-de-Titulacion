@@ -22,6 +22,7 @@
         />
             <menuitem id="reportes_ventas_menu"
                   name="Reporte de ventas"
+                  action="reporte_venta_wizard_view_form_action"
                   parent="reportes_menu"
                   sequence="10"
             />
