@@ -40,7 +40,7 @@ class ReporteVentaWizard(models.TransientModel):
     type_report = fields.Selection([
         ('personal', 'Por cliente'),
         ('general', 'Todos los clientes')
-    ], string='Report type', default='personal')
+    ], string='Tipo de reporte', default='personal')
     document_number = fields.Char(string='Número de documento')
     range = fields.Selection([
         ('month', 'Por mes'),
@@ -54,5 +54,5 @@ class ReporteVentaWizard(models.TransientModel):
         (datetime.now() + relativedelta(months=+1, day=1, days=-1)).date()))
 
     # TODO: Falta implementar
-    def button_export_pdf(self):
+    def download_pdf(self):
         pass

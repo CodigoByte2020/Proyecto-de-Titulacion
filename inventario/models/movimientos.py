@@ -16,8 +16,8 @@ class Movimientos(models.Model):
     # fecha = fields.Datetime(default=lambda self: fields.Datetime.now(), string='Fecha')
     fecha = fields.Datetime(string='Fecha')
     producto_id = fields.Many2one('base.producto')
-    cantidad = fields.Float(string='Cantidad')
-    total = fields.Float(string='Total')
+    cantidad = fields.Float(string='Cantidad', group_operator=False)
+    total = fields.Float(string='Total', group_operator=False)
 
     # @api.model
     # def _cron_movimientos(self, fecha):
