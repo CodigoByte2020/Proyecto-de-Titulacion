@@ -52,6 +52,11 @@ class ReporteVentaWizard(models.TransientModel):
     date_from = fields.Date('Desde', default=lambda self: fields.Date.to_string(date.today().replace(day=1)))
     date_to = fields.Date('Hasta', default=lambda self: fields.Date.to_string(
         (datetime.now() + relativedelta(months=+1, day=1, days=-1)).date()))
+    report_number = fields.Integer(default=0)
+
+    def get_report_number(self):
+        self.report_number += 1
+        return self.report_number
 
     def reporte_venta_pdf(self):
         detalle_ventas_model = self.env['detalle.ventas']

@@ -40,7 +40,8 @@
                     </group>
                 </sheet>
                 <footer>
-                    <button name="reporte_venta_pdf" icon="fa-download" string="Descargar" type="object" class="btn-primary"/>
+<!--                    <button name="reporte_venta_pdf" icon="fa-download" string="Descargar" type="object" class="btn-primary"/>-->
+                    <button name="%(ventas.reporte_venta_pdf)d" string="Descargar" type="action" class="btn-primary"/>
                     <button string="Cancelar" class="oe_link" special="cancel"/>
                 </footer>
             </form>
