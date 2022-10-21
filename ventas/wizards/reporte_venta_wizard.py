@@ -53,6 +53,17 @@ class ReporteVentaWizard(models.TransientModel):
     date_to = fields.Date('Hasta', default=lambda self: fields.Date.to_string(
         (datetime.now() + relativedelta(months=+1, day=1, days=-1)).date()))
 
-    # TODO: Falta implementar
-    def download_pdf(self):
-        pass
+    def reporte_venta_pdf(self):
+        detalle_ventas_model = self.env['detalle.ventas']
+        domain = [('venta_id.state', '=', 'confirmed')]
+        if self.type_report == 'personal':
+            domain += [('venta_id.cliente_id.numero_documento', '=', self.document_number)]
+        if self.range == 'dates':
+            domain += [
+                ('venta_id.fecha', '>=', self.date_from),
+                ('venta_id.fecha', '<=', self.date_to)
+            ]
+            return detalle_ventas_model.search(domain)
+        else:
+            return detalle_ventas_model.search(domain).filtered(
+                lambda x: x.venta_id.fecha.month == int(self.month) and x.venta_id.fecha.year == int(self.year))

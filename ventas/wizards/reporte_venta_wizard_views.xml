@@ -40,7 +40,7 @@
                     </group>
                 </sheet>
                 <footer>
-                    <button name="download_pdf" icon="fa-download" string="Descargar" type="object" class="btn-primary"/>
+                    <button name="reporte_venta_pdf" icon="fa-download" string="Descargar" type="object" class="btn-primary"/>
                     <button string="Cancelar" class="oe_link" special="cancel"/>
                 </footer>
             </form>
