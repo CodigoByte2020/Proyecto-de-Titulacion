@@ -7,12 +7,24 @@
                         <div class="page">
                             <div class="row">
                                 <div class="col-12" style="color: #885afd; font-size: 28px; letter-spacing: 2px; margin-top: 18px; margin-bottom: 14px;">
-                                   REPORTE DE VENTA <strong>#<span t-esc="o.get_report_number()"/></strong>
+                                   <strong>REPORTE DE VENTA</strong>
                                 </div>
                             </div>
                             <div class="row" style="color:#272d3b; font-weight: 400;">
-                                <div class="col-6"><strong>CLIENTE: DANNA ZELADA</strong></div>
-                                <div class="col-6"><strong>MES/AÑO: OCTUBRE/2022</strong></div>
+                                <div class="col-6">
+                                    <strong t-if="o.type_report == 'personal'">
+                                        CLIENTE: <span t-esc="env['base.persona'].search([('rango_cliente', '=', 1), ('numero_documento', '=', o.document_number)]).name"/>
+                                    </strong>
+                                    <strong t-else="">TODOS LOS CLIENTES</strong>
+                                </div>
+                                <div class="col-6">
+                                    <strong t-if="o.range == 'month'">
+                                        <span t-field="o.month"/>/<span t-field="o.year"/>
+                                    </strong>
+                                    <strong t-else="">
+                                        <span t-field="o.date_from"/> - <span t-field="o.date_to"/>
+                                    </strong>
+                                </div>
                             </div>
                             <table class="data-table" style="margin-top:15px; border-collapse: collapse; width: 100%; font-size: 12px;">
                                 <tr>
@@ -47,7 +59,7 @@
                                     <t t-else="">
                                         <t t-set="back" t-value="'background: #ffffff;'"/>
                                     </t>
-                                    <tr>
+                                    <tr t-att-style="back">
                                         <td style="padding: 10px 5px;">
                                             <span t-field="line.venta_id.user_id"/>
                                         </td>
@@ -74,17 +86,26 @@
                                 </t>
 
                                 <tr style="border-top: 3px solid #000;">
+                                    <t t-set="subtotal" t-value="sum(lines.mapped(lambda x: x.subtotal))"/>
+                                    <t t-set="igv" t-value="subtotal * 0.18"/>
+                                    <t t-set="total" t-value="subtotal + igv"/>
                                     <td colspan="5" rowspan="5"/>
                                     <td style="text-align: center; border-bottom: solid #cecece 1px;">Subtotal</td>
-                                    <td style="text-align: center; border-bottom: solid #cecece 1px; padding: 20px 0px;">100</td>
+                                    <td style="text-align: center; border-bottom: solid #cecece 1px; padding: 20px 0px;">
+                                        <t t-esc="subtotal" t-options='{"widget": "monetary", "display_currency": lines[0].venta_id.currency_id}'/>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: center; border-bottom: solid #cecece 1px;">IGV</td>
-                                    <td style="text-align: center; border-bottom: solid #cecece 1px; padding: 20px 0px;">200</td>
+                                    <td style="text-align: center; border-bottom: solid #cecece 1px; padding: 20px 0px;">
+                                        <t t-esc="igv" t-options='{"widget": "monetary", "display_currency": lines[0].venta_id.currency_id}'/>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: center; border-bottom: 3px solid #000;">Total</td>
-                                    <td style="text-align: center; border-bottom: 3px solid #000; padding: 20px 0px;">300</td>
+                                    <td style="text-align: center; border-bottom: 3px solid #000; padding: 20px 0px;">
+                                        <t t-esc="total" t-options='{"widget": "monetary", "display_currency": lines[0].venta_id.currency_id}'/>
+                                    </td>
                                 </tr>
                             </table>
                         </div>

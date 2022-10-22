@@ -72,3 +72,7 @@ class ReporteVentaWizard(models.TransientModel):
         else:
             return detalle_ventas_model.search(domain).filtered(
                 lambda x: x.venta_id.fecha.month == int(self.month) and x.venta_id.fecha.year == int(self.year))
+
+    # FIXME:
+    #   - Falta en el reporte cuando es todos los clientes
+    #   - Indicar el cliente
