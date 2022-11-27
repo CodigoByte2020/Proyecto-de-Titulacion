@@ -53,6 +53,7 @@ class ReporteVentaWizard(models.TransientModel):
     date_to = fields.Date('Hasta', default=lambda self: fields.Date.to_string(
         (datetime.now() + relativedelta(months=+1, day=1, days=-1)).date()))
     report_number = fields.Integer(default=0)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
     def get_report_number(self):
         self.report_number += 1

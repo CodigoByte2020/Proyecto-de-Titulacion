@@ -60,7 +60,7 @@ class CreditoCliente(models.Model):
     def name_get(self):
         result = []
         for rec in self:
-            result.append((rec.id, f'{rec.cliente_id.name} - {rec.credito_alerta_id.display_name}'))
+            result.append((rec.id, rec.cliente_id.display_name))
         return result
 
     @api.constrains('deuda_inicial')

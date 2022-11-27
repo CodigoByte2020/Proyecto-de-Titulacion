@@ -4,9 +4,10 @@ from odoo import api, fields, models
 class Persona(models.Model):
     _inherit = 'base.persona'
 
-    credito_cliente_id = fields.Many2one('credito.cliente', string='Límite de crédito')
+    credito_cliente_id = fields.Many2one('credito.cliente')
     used_credit = fields.Monetary(string='Crédito utilizado', readonly=True)
     available_credit = fields.Monetary(string='Crédito disponible', readonly=True)
+    credit_limit = fields.Monetary(related='credito_cliente_id.credito_alerta_id.monto', string='Límite de crédito')
 
     def calculate_credit(self):
         deuda = self.env['movimientos.credito.cliente'].search([

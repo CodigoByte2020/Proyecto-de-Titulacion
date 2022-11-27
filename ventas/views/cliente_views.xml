@@ -13,9 +13,10 @@
                                 class="btn btn-primary"/>
                         <group>
                             <field name="currency_id" invisible="1"/>
-                            <field name="credito_cliente_id"
-                                   options="{'currency_field': 'currency_id', 'no_open': True, 'no_create': True}"
-                                   domain="[('cliente_id', '=', id)]"/>
+<!--                            <field name="credito_cliente_id"-->
+<!--                                   options="{'currency_field': 'currency_id', 'no_open': True, 'no_create': True, 'no_edit': True}"-->
+<!--                                   domain="[('cliente_id', '=', id)]"/>-->
+                            <field name="credit_limit" options="{'currency_field': 'currency_id'}"/>
                             <field name="used_credit" options="{'currency_field': 'currency_id'}"/>
                             <field name="available_credit" options="{'currency_field': 'currency_id'}"/>
                         </group>

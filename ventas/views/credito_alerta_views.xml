@@ -22,7 +22,8 @@
                     <div class="oe_title">
                         <label for="monto" class="oe_edit_only"/>
                         <h1>
-                            <field name="monto" placeholder="Monto"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="monto" options="{'currency_field': 'currency_id'}"/>
                         </h1>
                     </div>
                     <group>

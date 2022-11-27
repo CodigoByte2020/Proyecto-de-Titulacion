@@ -5,8 +5,9 @@ class CreditoAlerta(models.Model):
     _name = 'credito.alerta'
     _description = 'Alerta de créditos'
 
-    monto = fields.Float(string='Monto', required=True)
+    monto = fields.Monetary(string='Monto', required=True)
     active = fields.Boolean(string='Activo', default=True)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
     def name_get(self):
         result = []

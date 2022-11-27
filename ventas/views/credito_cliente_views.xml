@@ -29,7 +29,7 @@
                     <group>
                         <group>
                             <field name="currency_id" invisible="1"/>
-                            <field name="cliente_id" options="{'no_open': True, 'no_create': True}"/>
+                            <field name="cliente_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
                             <field name="deuda_inicial" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="credito_alerta_id"/>
                         </group>
@@ -125,7 +125,7 @@
                         <group>
                             <field name="currency_id" invisible="1"/>
 <!--                            <field name="cliente_id"/>-->
-                            <field name="credito_cliente_id" options="{'no_open': True, 'no_create': True}"/>
+                            <field name="credito_cliente_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
                             <field name="monto" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="deuda_actual" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                         </group>
