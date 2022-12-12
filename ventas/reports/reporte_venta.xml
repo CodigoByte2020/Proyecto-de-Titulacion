@@ -22,7 +22,7 @@
                                         <span t-field="o.month"/>/<span t-field="o.year"/>
                                     </strong>
                                     <strong t-else="">
-                                        <span t-field="o.date_from"/> - <span t-field="o.date_to"/>
+                                        <span t-field="o.date_from"/> Al <span t-field="o.date_to"/>
                                     </strong>
                                 </div>
                             </div>
@@ -86,19 +86,18 @@
                                 </t>
 
                                 <tr style="border-top: 3px solid #000;">
-                                    <t t-set="subtotal" t-value="sum(lines.mapped(lambda x: x.subtotal))"/>
-                                    <t t-set="igv" t-value="subtotal * 0.18"/>
-                                    <t t-set="total" t-value="subtotal + igv"/>
+                                    <t t-set="total" t-value="sum(lines.mapped(lambda x: x.subtotal))"/>
+                                    <t t-set="amount_tax" t-value="total * 0.18"/>
                                     <td colspan="5" rowspan="5"/>
                                     <td style="text-align: center; border-bottom: solid #cecece 1px;">Subtotal</td>
                                     <td style="text-align: center; border-bottom: solid #cecece 1px; padding: 20px 0px;">
-                                        <t t-esc="subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        <t t-esc="total - amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: center; border-bottom: solid #cecece 1px;">IGV</td>
                                     <td style="text-align: center; border-bottom: solid #cecece 1px; padding: 20px 0px;">
-                                        <t t-esc="igv" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        <t t-esc="amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                                     </td>
                                 </tr>
                                 <tr>

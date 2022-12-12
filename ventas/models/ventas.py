@@ -130,12 +130,12 @@ class Ventas(models.Model):
     @api.depends('detalle_ventas_ids')
     def _compute_total(self):
         for rec in self:
-            amount_untaxed = sum(rec.detalle_ventas_ids.mapped('subtotal'))
-            amount_tax = amount_untaxed * 0.18
+            total = sum(rec.detalle_ventas_ids.mapped('subtotal'))
+            amount_tax = total * 0.18
             rec.write({
-                'amount_untaxed': amount_untaxed,
+                'amount_untaxed': total - amount_tax,
                 'amount_tax': amount_tax,
-                'total': amount_untaxed + amount_tax
+                'total': total
             })
 
 

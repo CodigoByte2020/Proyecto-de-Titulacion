@@ -8,7 +8,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="type_report" required="1"/>
+                            <field name="type_report" required="1" readonly="1"/>
                             <field name="range" widget="radio" required="1"/>
                         </group>
                         <group>
