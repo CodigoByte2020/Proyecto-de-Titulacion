@@ -211,6 +211,35 @@ class Ventas(models.Model):
         domain3 = ['|', ('tipo_venta', '=', 'contado'), '&', ('total', '>', '10'), ('cliente_id.name', '=', 'Gianmarco')]
         records = self.search(domain3)
 
+    # TODO: Transformando una sentencia SQL a una expresión de dominio
+        query = '''SELECT l.id
+                    FROM account_move_line AS l, account_account, account_move am
+                    WHERE (l.account_id = account_account.id) AND (l.move_id = am.id)
+                        AND (am.state IN %s)
+                        AND (account_account.internal_type IN %s)
+                        AND (COALESCE(l.date_maturity,l.date) >= %s)\
+                        AND ((l.partner_id IN %s) OR (l.partner_id IS NULL))
+                    AND (l.date <= %s)
+                    AND l.company_id IN %s
+        '''
+
+        domain_move_lines = [
+            ('move_id.state', 'in', 'move_state'),
+            ('account_id.internal_type', 'in', 'account_type'),
+            ('date', '<=', 'date_from'),
+            ('company_id', 'in', 'company_ids'),
+            '|',
+            ('partner_id', 'in', 'partner_ids'),
+            ('partner_id', '=', False),
+            '|',
+            '&',
+            ('date_maturity', '!=', False),
+            ('date_maturity', '>=', 'date_from'),
+            '&',
+            ('date', '!=', False),
+            ('date', '>=', 'date_from')
+        ]
+
     @api.constrains('tipo_venta')
     def _check_tipo_venta(self):
         for rec in self:
