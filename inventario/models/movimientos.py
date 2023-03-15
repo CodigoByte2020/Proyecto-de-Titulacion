@@ -10,6 +10,7 @@ TIPO_MOVIMIENTO_SELECTION = [
 
 class Movimientos(models.Model):
     _name = 'movimientos'
+    _description = 'Movimientos de inventario.'
 
     tipo = fields.Selection(TIPO_MOVIMIENTO_SELECTION, string='Tipo')
     user_id = fields.Many2one('res.users', string='Responsable', readonly=True)

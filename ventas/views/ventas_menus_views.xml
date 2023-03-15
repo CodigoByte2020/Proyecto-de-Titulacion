@@ -10,26 +10,26 @@
                   parent="ventas_menu_root"
                   sequence="10"
         />
-        <menuitem id="creditos_menu"
-                  name="Créditos"
-                  parent="ventas_menu_root"
-                  sequence="20"
-        />
+<!--        <menuitem id="creditos_menu"-->
+<!--                  name="Créditos"-->
+<!--                  parent="ventas_menu_root"-->
+<!--                  sequence="20"-->
+<!--        />-->
         <menuitem id="reportes_menu"
                   name="Reportes"
                   parent="ventas_menu_root"
                   sequence="30"
         />
-        <menuitem id="configuracion_menu"
-                  name="Configuración"
-                  parent="ventas_menu_root"
-                  sequence="40"
-                  groups="estructura_base.estructura_base_group_administrador"
-        />
-            <menuitem id="configuracion_creditos_menu"
-                      name="Créditos"
-                      parent="configuracion_menu"
-                      sequence="10"
-            />
+<!--        <menuitem id="configuracion_menu"-->
+<!--                  name="Configuración"-->
+<!--                  parent="ventas_menu_root"-->
+<!--                  sequence="40"-->
+<!--                  groups="estructura_base.estructura_base_group_administrador"-->
+<!--        />-->
+<!--            <menuitem id="configuracion_creditos_menu"-->
+<!--                      name="Créditos"-->
+<!--                      parent="configuracion_menu"-->
+<!--                      sequence="10"-->
+<!--            />-->
 
 </odoo>

@@ -7,7 +7,7 @@
         <field name="mode">primary</field>
         <field name="arch" type="xml">
             <xpath expr="//group[1]" position="after">
-                <notebook>
+                <notebook invisible="1">
                     <page string="Línea de Crédito">
                         <button name="calculate_credit" type="object" string="Calcular crédito"
                                 class="btn btn-primary"/>
