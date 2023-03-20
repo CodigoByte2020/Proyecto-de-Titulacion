@@ -21,7 +21,9 @@
         # 'views/credito_alerta_views.xml',
         # 'views/impuestos_views.xml',
         'reports/reporte_venta.xml',
-        'wizards/reporte_venta_wizard_views.xml'
+        'wizards/reporte_venta_wizard_views.xml',
+        # REPORTS:
+        'reports/invoice_report.xml'
     ],
     'installable': True,
 }
