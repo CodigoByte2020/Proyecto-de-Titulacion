@@ -3,55 +3,95 @@
         <template id="template_invoice_report">
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="o">
+                <!-- CUANDO TRABAJAMOS CON ESTA ESTRUCTURA, NO SE PUEDE DECLARAR UN HEADER -->
                     <t t-call="web.basic_layout">
-                        <div class="header border border-1">
+<!--                        <div class="header border border-1">-->
+<!--                            <div class="row">-->
+<!--                                <div class="col-2"/>-->
+<!--                                <div class="col-8">-->
+<!--&lt;!&ndash;                                    <img src="formatos_alta/static/src/img/logo-alta.jpeg" style="max-width: 50%; margin-bottom: 14px;"/>&ndash;&gt;-->
+<!--                                    <img src="ventas/static/src/img/logo2.jpg" style="max-width: 50%"/><br/>-->
+<!--                                    Celular: <span t-field="o.user_id.company_id.phone"/><br/>-->
+<!--                                    Dirección: <span t-field="o.user_id.company_id.street"/><br/>-->
+<!--                                    <span>&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</span><br/>-->
+<!--                                    Atendido por: <span t-field="o.user_id.name"/>-->
+<!--                                </div>-->
+<!--                                <div class="col-2"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <div class="page">
                             <div class="row">
                                 <div class="col-2"/>
-                                <div class="col-8">
-<!--                                    <img src="formatos_alta/static/src/img/logo-alta.jpeg" style="max-width: 50%; margin-bottom: 14px;"/>-->
-                                    <img src="ventas/static/src/img/logo2.jpg" style="max-width: 50%"/><br/>
-                                    Celular: <span t-field="o.user_id.company_id.phone"/><br/>
-                                    Dirección: <span t-field="o.user_id.company_id.street"/><br/>
-                                    <span>------------------------</span><br/>
-                                    Atendido por: <span t-field="o.user_id.name"/>
+                                <div class="col-8 text-center">
+                                    <img src="ventas/static/src/img/logo2.jpg" style="max-width: 75%"/><br/><br/>
+                                    Atendido por: <span t-field="o.user_id.name"/><br/>
+                                    Fecha: <span t-field="o.fecha"/><br/>
+                                    <span t-field="o.name"/>
                                 </div>
                                 <div class="col-2"/>
                             </div>
-                        </div>
-                        <div class="page border border-1">
-                            <table class="table table-sm table-bordered">
-                                <thead>
-                                    <tr class="bg-primary text-warning">
-                                        <th>PRODUCTO</th>
-                                        <th>CANTIDAD</th>
-                                        <th>PRECIO UNIT.</th>
-                                        <th>SUBTOTAL</th>
+                            <br/>
+                            <table class="table table-striped" style="width: 100%;">
+                                <thead class="thead-dark">
+                                    <tr class="bg-primary text-warning text-center font-weight-bold">
+                                        <th style="width: 25%;">PRODUCTO</th>
+                                        <th style="width: 25%;">CANTIDAD</th>
+                                        <th style="width: 25%;">P. UNIT.</th>
+                                        <th style="width: 25%;">SUBTOTAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="o.detalle_ventas_ids" t-as="line">
                                         <tr>
-                                            <td><span t-field="line.producto_id"/></td>
-                                            <td><span t-field="line.cantidad"/></td>
-                                            <td><span t-field="line.precio_venta"/></td>
-                                            <td><span t-field="line.subtotal"/></td>
+                                            <td><span t-field="line.producto_id.name"/></td>
+                                            <td class="text-center"><span t-field="line.cantidad"/></td>
+                                            <td class="text-center"><span t-field="line.precio_venta" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                            <td class="text-center"><span t-field="line.subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                         </tr>
                                     </t>
+                                    <tr>
+                                        <td colspan="2" rowspan="3" class="bg-white"/>
+                                        <td>Base Imp.</td>
+                                        <td><span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Impuestos</td>
+                                        <td><span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total</td>
+                                        <td><span t-field="o.total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                    </tr>
                                 </tbody>
+<!--                                <tfoot>-->
+<!--                                    <tr>-->
+<!--                                        <td colspan="2" rowspan="3"/>-->
+<!--                                        <td>Base imponible:</td>-->
+<!--                                        <td>0.0</td>-->
+<!--                                    </tr>-->
+<!--                                    <tr>-->
+<!--                                        <td>Impuestos - 18%:</td>-->
+<!--                                        <td>0.0</td>-->
+<!--                                    </tr>-->
+<!--                                    <tr>-->
+<!--                                        <td>Total</td>-->
+<!--                                        <td>0.0</td>-->
+<!--                                    </tr>-->
+<!--                                </tfoot>-->
                             </table>
                         </div>
-                        <div class="footer border border-1">
+                        <div class="footer">
                             <div class="row">
-                                <div class="col-2"/>
-                                <div class="col-8">
-                                    <span t-field="o.name"/><br/>
-                                    <span t-field="o.fecha"/>
+                                <div class="col-12 text-center" style="font-size: 8px;">
+<!--                                    <span t-field="o.name"/><br/>-->
+<!--                                    <span t-field="o.fecha"/>-->
+                                    <span>Celular: <span t-field="o.user_id.company_id.phone"/><br/></span>
+                                    <span>Dirección: <span t-field="o.user_id.company_id.street"/><br/></span>
                                 </div>
-                                <div class="col-2"/>
                             </div>
                         </div>
                     </t>
-                    <p style="page-break-before: always;"/>
+<!--                    <p style="page-break-before: always;"/>-->
                 </t>
             </t>
         </template>

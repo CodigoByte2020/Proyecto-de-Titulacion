@@ -6,7 +6,7 @@ class Producto(models.Model):
 
     categoria_id = fields.Many2one('categoria.producto', required=True, string='Categoría')
     movimiento_ids = fields.One2many('movimientos', 'producto_id')
-    stock = fields.Float(string='Stock', compute='_compute_stock', store=True)
+    stock = fields.Float(string='Stock', compute='_compute_stock', store=True, group_operator=False)
 
     @api.depends('movimiento_ids.total')
     def _compute_stock(self):

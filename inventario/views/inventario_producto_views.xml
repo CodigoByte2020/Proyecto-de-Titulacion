@@ -38,7 +38,6 @@
                 <sheet>
                     <group>
                         <group>
-                            <t t-debug="pdb"/>
                             <field name="name"/>
                             <field name="categoria_id"/>
                             <field name="comentario"/>
