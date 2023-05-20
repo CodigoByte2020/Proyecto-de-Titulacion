@@ -24,7 +24,8 @@
                                 <div class="col-2"/>
                                 <div class="col-8 text-center">
                                     <img src="ventas/static/src/img/logo2.jpg" style="max-width: 75%"/><br/><br/>
-                                    Atendido por: <span t-field="o.user_id.name"/><br/>
+                                    Responsable: <span t-field="o.user_id.name"/><br/>
+                                    Cliente: <span t-field="o.cliente_id.name"/><br/>
                                     Fecha: <span t-field="o.fecha"/><br/>
                                     <span t-field="o.name"/>
                                 </div>
