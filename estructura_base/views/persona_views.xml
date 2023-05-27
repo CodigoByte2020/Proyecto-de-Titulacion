@@ -39,10 +39,12 @@
                             <field name="tipo_documento"/>
                             <field name="numero_documento"/>
                             <field name="name"/>
+                            <field name="estado" attrs="{'invisible': [('tipo_documento', '!=', 'ruc')]}"/>
+                            <field name="condicion" attrs="{'invisible': [('tipo_documento', '!=', 'ruc')]}"/>
                         </group>
                         <group>
-                            <field name="celular"/>
                             <field name="direccion"/>
+                            <field name="celular"/>
                             <field name="email"/>
                         </group>
                     </group>

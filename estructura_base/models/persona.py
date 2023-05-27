@@ -31,6 +31,8 @@ class Persona(models.Model):
     rango_cliente = fields.Integer(default=0)
     rango_proveedor = fields.Integer(default=0)
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    estado = fields.Char(string='Estado')
+    condicion = fields.Char(string='Condición')
 
     _sql_constraints = [
         ('name_uniq', 'unique(numero_documento)', 'Ya existe un Cliente con el Número de documento ingresado !!!'),
@@ -41,14 +43,14 @@ class Persona(models.Model):
         if self.tipo_documento:
             return {'value': {'numero_documento': False}}
 
-    @api.constrains('numero_documento')
-    def _check_numero_documento(self):
-        for rec in self:
-            if rec.tipo_documento == 'dni' and not dni_validator.match(rec.numero_documento):
+    @api.onchange('numero_documento')
+    def _onchange_numero_documento(self):
+        if self.numero_documento:
+            if self.tipo_documento == 'dni' and not dni_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 8 números.')
-            elif rec.tipo_documento == 'ce' and not ce_validator.match(rec.numero_documento):
+            elif self.tipo_documento == 'ce' and not ce_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 9 números.')
-            elif rec.tipo_documento == 'ruc' and not ruc_validator.match(rec.numero_documento):
+            elif self.tipo_documento == 'ruc' and not ruc_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 11 números.')
 
     def name_get(self):
@@ -71,9 +73,13 @@ class Persona(models.Model):
                 nombre = response_json.get('nombre', '')
                 direccion = response_json.get('direccion', '')
                 provincia = response_json.get('provincia', '')
+                estado = response_json.get('estado', '')
+                condicion = response_json.get('condicion', '')
                 self.update({
                     'name': nombre,
                     'direccion': direccion and provincia and f'{direccion}\n{provincia} - PERÚ',
+                    'estado': estado,
+                    'condicion': condicion
                 })
             elif response.status_code == 422:
                 raise ValidationError(f'El Número de documento {self.numero_documento} no cumple con las reglas de '

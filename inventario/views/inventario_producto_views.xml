@@ -94,7 +94,7 @@
     </record>
 
     <record id="producto_action" model="ir.actions.act_window">
-        <field name="name">Productos</field>
+        <field name="name">Producto</field>
         <field name="res_model">base.producto</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="context">
@@ -103,7 +103,7 @@
     </record>
 
     <menuitem id="producto_menu"
-              name="Productos"
+              name="Producto"
               action="producto_action"
               sequence="10"
               parent="productos_menu"/>
@@ -137,13 +137,13 @@
     </record>
 
     <record id="categoria_producto_action" model="ir.actions.act_window">
-        <field name="name">Categorías</field>
+        <field name="name">Categoría</field>
         <field name="res_model">categoria.producto</field>
         <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="categoria_producto_menu"
-              name="Categorías"
+              name="Categoría"
               action="categoria_producto_action"
               sequence="20"
               parent="productos_menu"/>

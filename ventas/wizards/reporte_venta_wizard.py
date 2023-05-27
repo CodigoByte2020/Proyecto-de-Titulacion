@@ -61,7 +61,7 @@ class ReporteVentaWizard(models.TransientModel):
 
     def reporte_venta_pdf(self):
         detalle_ventas_model = self.env['detalle.ventas']
-        domain = [('venta_id.state', '=', 'confirmed')]
+        domain = []
         if self.type_report == 'personal':
             domain += [('venta_id.cliente_id.numero_documento', '=', self.document_number)]
         if self.range == 'dates':
