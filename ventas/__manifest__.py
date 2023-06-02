@@ -23,7 +23,8 @@
         'reports/reporte_venta.xml',
         'wizards/reporte_venta_wizard_views.xml',
         # REPORTS:
-        'reports/invoice_report.xml'
+        # 'reports/invoice_report.xml',
+        'reports/invoice_report2.xml'
     ],
     'installable': True,
 }

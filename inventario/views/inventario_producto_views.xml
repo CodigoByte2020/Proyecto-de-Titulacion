@@ -46,6 +46,8 @@
                             <field name="currency_id" invisible="1"/>
 <!--                            <field name="precio_compra" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
                             <field name="precio_venta" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="unidad_medida"/>
+                            <field name="code"/>
                         </group>
                     </group>
                     <notebook>

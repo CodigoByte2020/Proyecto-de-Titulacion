@@ -7,9 +7,9 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 TIPO_DOCUMENTO_SELECTION = [
-    ('dni', 'DOCUMENTO NACIONAL DE IDENTIDAD'),
-    ('ce', 'CARNET DE EXTRANJERÍA'),
-    ('ruc', 'REGISTRO ÚNICO DE CONTRIBUYENTES')
+    ('DNI', 'DOCUMENTO NACIONAL DE IDENTIDAD'),
+    ('CE', 'CARNET DE EXTRANJERÍA'),
+    ('RUC', 'REGISTRO ÚNICO DE CONTRIBUYENTES')
 ]
 
 dni_validator = re.compile(r'^\d{8}$')
@@ -46,11 +46,11 @@ class Persona(models.Model):
     @api.onchange('numero_documento')
     def _onchange_numero_documento(self):
         if self.numero_documento:
-            if self.tipo_documento == 'dni' and not dni_validator.match(self.numero_documento):
+            if self.tipo_documento == 'DNI' and not dni_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 8 números.')
-            elif self.tipo_documento == 'ce' and not ce_validator.match(self.numero_documento):
+            elif self.tipo_documento == 'CE' and not ce_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 9 números.')
-            elif self.tipo_documento == 'ruc' and not ruc_validator.match(self.numero_documento):
+            elif self.tipo_documento == 'RUC' and not ruc_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 11 números.')
 
     def name_get(self):

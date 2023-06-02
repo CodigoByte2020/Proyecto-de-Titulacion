@@ -10,11 +10,11 @@
         'mail'
     ],
     'data': [
-        'views/assets.xml',
+        # 'views/assets.xml',
         'security/estructura_base_groups.xml',
         'security/ir.model.access.csv',
         'views/persona_views.xml',
-        'views/mail_channel_views.xml'
+        # 'views/mail_channel_views.xml'
     ],
     'installable': True
 }

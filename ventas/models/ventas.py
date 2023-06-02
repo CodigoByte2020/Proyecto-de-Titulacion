@@ -22,9 +22,9 @@ class Ventas(models.Model):
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     tipo_venta = fields.Selection(TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta')
     fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
-    amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Importe')
-    amount_tax = fields.Float(compute='_compute_total', store=True, string='Impuestos (18%)')
-    total = fields.Float(compute='_compute_total', store=True, string='Total')
+    amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Ope. Gravadas')
+    amount_tax = fields.Float(compute='_compute_total', store=True, string='IGV 18%')
+    total = fields.Float(compute='_compute_total', store=True, string='Importe Total')
     comentarios = fields.Text(string='Comentarios')
     detalle_ventas_ids = fields.One2many(
         'detalle.ventas',
@@ -32,6 +32,7 @@ class Ventas(models.Model):
         string='Líneas de pedido'
     )
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
 
     # Crea un registro de movimiento de crédito de cliente por venta.
     # def action_set_confirm(self):
@@ -72,16 +73,17 @@ class Ventas(models.Model):
                 if not credito:
                     raise ValidationError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
 
-    @api.depends('detalle_ventas_ids')
+    @api.depends('detalle_ventas_ids.subtotal')
     def _compute_total(self):
-        for rec in self:
-            total = sum(rec.detalle_ventas_ids.mapped('subtotal'))
+        for move in self:
+            total = sum(move.detalle_ventas_ids.mapped('subtotal'))
             amount_tax = total * 0.18
-            rec.write({
-                'amount_untaxed': total - amount_tax,
-                'amount_tax': amount_tax,
-                'total': total
-            })
+            # move.update({
+            #     'amount_untaxed': total - amount_tax,
+            #     'amount_tax': amount_tax,
+            #     'total': total
+            # })
+            move.total = total
 
 
 class DetalleVentas(models.Model):
@@ -95,11 +97,30 @@ class DetalleVentas(models.Model):
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
 
-    @api.depends('cantidad', 'precio_venta')
-    def _compute_subtotal(self):
-        for rec in self:
-            if rec.cantidad and rec.precio_venta:
-                rec.update({'subtotal': rec.cantidad * rec.precio_venta})
+
+    # FIXME:
+    #  INVESTIGAR UNA POSIBLE SOLUCIÓN PARA QUE LOS CAMPOS DE TOTALES DE VENTA SE MODIFIQUEN DESDE LA INTERFAZ AL
+    #  CAMBIAR UN LINEA DE DETALLE
+    def _get_price_subtotal(self, cantidad=None, precio_venta=None):
+        self.ensure_one()
+        return self._get_price_subtotal_model(cantidad=cantidad or self.cantidad, precio_venta=precio_venta or self.precio_venta)
+
+    @api.model
+    def _get_price_subtotal_model(self, cantidad, precio_venta):
+        subtotal = cantidad * precio_venta
+        res = {'subtotal': subtotal}
+        return res
+
+    @api.onchange('cantidad', 'precio_venta')
+    def _onchange_subtotal(self):
+        for line in self:
+            line.update(line._get_price_subtotal())
+
+    # @api.depends('cantidad', 'precio_venta')
+    # def _compute_subtotal(self):
+    #     for rec in self:
+    #         if rec.cantidad and rec.precio_venta:
+    #             rec.update({'subtotal': rec.cantidad * rec.precio_venta})
 
     def validate_stock(self):
         quantity_product = self.env['movimientos'].search([('producto_id', '=', self.producto_id.id)],
