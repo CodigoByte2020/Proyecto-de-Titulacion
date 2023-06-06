@@ -3,7 +3,7 @@
     <record id="invoice_seq" model="ir.sequence">
         <field name="name">Secuencia de Factura</field>
         <field name="code">ventas</field>
-        <field name="prefix">F001</field>
+        <field name="prefix">F001-</field>
         <field name="padding">8</field>
         <field name="company_id" eval="False"/>
     </record>

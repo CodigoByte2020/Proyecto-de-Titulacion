@@ -12,6 +12,11 @@ TIPO_VENTA_SELECTION = [
     ('credito', 'Crédito')
 ]
 
+TYPE_DOCUMENT_SELECTION = [
+    ('invoice', 'Factura'),
+    ('ticket', 'Boleta')
+]
+
 
 class Ventas(models.Model):
     _name = 'ventas'
@@ -21,7 +26,7 @@ class Ventas(models.Model):
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     tipo_venta = fields.Selection(TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta')
-    fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
+    fecha = fields.Date(default=fields.Date.today(), string='Fecha')
     amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Ope. Gravadas')
     amount_tax = fields.Float(compute='_compute_total', store=True, string='IGV 18%')
     total = fields.Float(compute='_compute_total', store=True, string='Importe Total')
@@ -31,8 +36,9 @@ class Ventas(models.Model):
         'venta_id',
         string='Líneas de pedido'
     )
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, string='Moneda')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
+    type_document = fields.Selection(TYPE_DOCUMENT_SELECTION, default='invoice', string='Tipo de documento')
 
     # Crea un registro de movimiento de crédito de cliente por venta.
     # def action_set_confirm(self):
@@ -78,12 +84,11 @@ class Ventas(models.Model):
         for move in self:
             total = sum(move.detalle_ventas_ids.mapped('subtotal'))
             amount_tax = total * 0.18
-            # move.update({
-            #     'amount_untaxed': total - amount_tax,
-            #     'amount_tax': amount_tax,
-            #     'total': total
-            # })
-            move.total = total
+            move.update({
+                'amount_untaxed': total - amount_tax,
+                'amount_tax': amount_tax,
+                'total': total
+            })
 
 
 class DetalleVentas(models.Model):
@@ -101,26 +106,26 @@ class DetalleVentas(models.Model):
     # FIXME:
     #  INVESTIGAR UNA POSIBLE SOLUCIÓN PARA QUE LOS CAMPOS DE TOTALES DE VENTA SE MODIFIQUEN DESDE LA INTERFAZ AL
     #  CAMBIAR UN LINEA DE DETALLE
-    def _get_price_subtotal(self, cantidad=None, precio_venta=None):
-        self.ensure_one()
-        return self._get_price_subtotal_model(cantidad=cantidad or self.cantidad, precio_venta=precio_venta or self.precio_venta)
+    # def _get_price_subtotal(self, cantidad=None, precio_venta=None):
+    #     self.ensure_one()
+    #     return self._get_price_subtotal_model(cantidad=cantidad or self.cantidad, precio_venta=precio_venta or self.precio_venta)
+    #
+    # @api.model
+    # def _get_price_subtotal_model(self, cantidad, precio_venta):
+    #     subtotal = cantidad * precio_venta
+    #     res = {'subtotal': subtotal}
+    #     return res
+    #
+    # @api.onchange('cantidad', 'precio_venta')
+    # def _onchange_subtotal(self):
+    #     for line in self:
+    #         line.update(line._get_price_subtotal())
 
-    @api.model
-    def _get_price_subtotal_model(self, cantidad, precio_venta):
-        subtotal = cantidad * precio_venta
-        res = {'subtotal': subtotal}
-        return res
-
-    @api.onchange('cantidad', 'precio_venta')
-    def _onchange_subtotal(self):
-        for line in self:
-            line.update(line._get_price_subtotal())
-
-    # @api.depends('cantidad', 'precio_venta')
-    # def _compute_subtotal(self):
-    #     for rec in self:
-    #         if rec.cantidad and rec.precio_venta:
-    #             rec.update({'subtotal': rec.cantidad * rec.precio_venta})
+    @api.depends('cantidad', 'precio_venta')
+    def _compute_subtotal(self):
+        for rec in self:
+            if rec.cantidad and rec.precio_venta:
+                rec.update({'subtotal': rec.cantidad * rec.precio_venta})
 
     def validate_stock(self):
         quantity_product = self.env['movimientos'].search([('producto_id', '=', self.producto_id.id)],

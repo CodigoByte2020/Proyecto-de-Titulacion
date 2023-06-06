@@ -7,9 +7,9 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 TIPO_DOCUMENTO_SELECTION = [
-    ('DNI', 'DOCUMENTO NACIONAL DE IDENTIDAD'),
-    ('CE', 'CARNET DE EXTRANJERÍA'),
-    ('RUC', 'REGISTRO ÚNICO DE CONTRIBUYENTES')
+    ('dni', 'Documento nacional de identidad'),
+    ('ce', 'Carnet de extranjería'),
+    ('ruc', 'Registro único de contribuyentes')
 ]
 
 dni_validator = re.compile(r'^\d{8}$')
@@ -46,11 +46,11 @@ class Persona(models.Model):
     @api.onchange('numero_documento')
     def _onchange_numero_documento(self):
         if self.numero_documento:
-            if self.tipo_documento == 'DNI' and not dni_validator.match(self.numero_documento):
+            if self.tipo_documento == 'dni' and not dni_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 8 números.')
-            elif self.tipo_documento == 'CE' and not ce_validator.match(self.numero_documento):
+            elif self.tipo_documento == 'ce' and not ce_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 9 números.')
-            elif self.tipo_documento == 'RUC' and not ruc_validator.match(self.numero_documento):
+            elif self.tipo_documento == 'ruc' and not ruc_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 11 números.')
 
     def name_get(self):
@@ -77,7 +77,7 @@ class Persona(models.Model):
                 condicion = response_json.get('condicion', '')
                 self.update({
                     'name': nombre,
-                    'direccion': direccion and provincia and f'{direccion}\n{provincia} - PERÚ',
+                    'direccion': direccion and provincia and f'{direccion} {provincia} - PERÚ',
                     'estado': estado,
                     'condicion': condicion
                 })
@@ -86,3 +86,9 @@ class Persona(models.Model):
                                       f'validación')
             elif response.status_code == 404:
                 raise ValidationError(f'El Número de documento {self.numero_documento} no existe')
+
+    def get_type_document_report(self):
+        type_document = dict(self._fields['tipo_documento'].selection)
+        for key, value in type_document.items():
+            if key == self.tipo_documento:
+                return key.upper()

@@ -6,70 +6,81 @@
                     <t t-call="web.basic_layout">
                         <div class="page">
                             <div class="row">
-                                <div class="col-2"/>
-                                <div class="col-8 text-left">
-                                    Fecha de emisión: <span t-field="o.fecha"/><br/>
+                                <div class="col-3 text-center">LOGO</div>
+                                <div class="col-6 text-center">
                                     <!-- *************************************************************************** -->
-                                    DATOS DEL EMISOR ELECTRÓNICO Y DEL DOCUMENTO
-                                    Razón Social: <span t-field="o.company_id.name"/><br/>
-                                    Domicilio Fiscal: <span t-field="o.company_id.street"/><br/>
-                                                      La Libertad - Trujillo - Alto Trujillo<br/>
-                                    Número de RUC: <span t-field="o.company_id.vat"/><br/>
-                                    Tipo de documento: FACTURA ELECTRÓNICA<br/>
-                                    Número correlativo: <span t-field="o.name"/><br/>
+<!--                                    DATOS DEL EMISOR ELECTRÓNICO Y DEL DOCUMENTO-->
+                                    <span t-field="o.company_id.name"/><br/>
+                                    <span t-field="o.company_id.phone"/> - <span t-field="o.company_id.email"/><br/>
+                                    <span t-field="o.company_id.street"/><br/>
                                     <!-- *************************************************************************** -->
-                                    DATOS DEL ADQUIRIENTE O USUARIO<br/>
-                                    Tipo de documento: <span t-field="o.cliente_id.tipo_documento"/><br/>
-                                    Número de documento: <span t-field="o.cliente_id.numero_documento"/><br/>
-                                    Apellidos y nombres, denominación o razón social: <span t-field="o.cliente_id.name"/><br/>
-                                    <!-- *************************************************************************** -->
-                                    TIPO DE MONEDA: <span t-field="o.currency_id.name"/><br/>
                                 </div>
-                                <div class="col-2"/>
+                                <div class="col-3 text-center" style="border: solid black 2px;">
+                                    R.U.C. <span t-field="o.company_id.vat"/><br/>
+                                    <span t-field="o.type_document"/> Electrónica<br/>
+                                    <span t-field="o.name"/><br/>
+                                </div>
                             </div>
+                            <br/>
+                            <br/>
+                            <div class="row">
+                                <div class="col-12">
+                                    <!-- *************************************************************************** -->
+                                    <!-- DATOS DEL ADQUIRIENTE O USUARIO -->
+                                    <span>Señor(es): </span><span t-field="o.cliente_id.name"/><br/>
+                                    <span t-esc="o.cliente_id.get_type_document_report()"/>: <span t-field="o.cliente_id.numero_documento"/><br/>
+                                    Dirección: <span t-field="o.cliente_id.direccion"/><br/>
+                                    <!-- *************************************************************************** -->
+                                    <div class="row">
+                                        <div class="col-6">Fecha de emisión: <span t-field="o.fecha"/></div>
+                                        <div class="col-6">MONEDA: <span t-field="o.currency_id.name"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br/>
                             <br/>
                             <table class="table table-striped" style="width: 100%;">
                                 <thead class="thead-dark">
                                     <tr class="bg-primary text-warning text-center font-weight-bold">
-                                        <th style="width: 15%;">UNIDAD DE MEDIDA</th>
-                                        <th style="width: 15%;">CANTIDAD</th>
-                                        <th style="width: 25%;">DESCRIPCIÓN</th>
-                                        <th style="width: 15%;">CÓDIGO</th>
-                                        <th style="width: 15%;">PRECIO UNITARIO</th>
-                                        <th style="width: 15%;">SUBTOTAL</th>
+                                        <th style="width: 15%;">Código</th>
+                                        <th style="width: 15%;">Cantidad</th>
+                                        <th style="width: 15%;">U. Med.</th>
+                                        <th style="width: 25%;">Descripción</th>
+                                        <th style="width: 15%;">P. Unit</th>
+                                        <th style="width: 15%;">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="o.detalle_ventas_ids" t-as="line">
                                         <tr>
-                                            <td><span t-field="line.producto_id.unidad_medida"/></td>
-                                            <td><span t-field="line.cantidad"/></td>
-                                            <td><span t-field="line.producto_id.name"/></td>
-                                            <td><span t-field="line.producto_id.code"/></td>
-                                            <td class="text-center"><span t-field="line.precio_venta" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
-                                            <td class="text-center"><span t-field="line.subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                            <td class="text-left"><span t-field="line.producto_id.code"/></td>
+                                            <td class="text-right"><span t-field="line.cantidad"/></td>
+                                            <td class="text-left"><span t-field="line.producto_id.unidad_medida"/></td>
+                                            <td class="text-left"><span t-field="line.producto_id.name"/></td>
+                                            <td class="text-right"><span t-field="line.precio_venta" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                            <td class="text-right"><span t-field="line.subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                         </tr>
                                     </t>
                                     <tr>
-                                        <td colspan="2" rowspan="3" class="bg-white"/>
-                                        <td>Ope. Gravadas:</td>
-                                        <td><span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                        <td colspan="4" rowspan="3" class="bg-white"/>
+                                        <td class="text-right" style="border-left: solid black 1px; border-top: solid black 1px;">Ope. Gravadas:</td>
+                                        <td class="text-right" style="border-right: solid black 1px; border-top: solid black 1px;"><span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                     </tr>
                                     <tr>
-                                        <td>IGV 18%</td>
-                                        <td><span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                        <td class="text-right" style="border-left: solid black 1px;">IGV 18%</td>
+                                        <td class="text-right" style="border-right: solid black 1px;"><span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                     </tr>
                                     <tr>
-                                        <td>Importe Total</td>
-                                        <td><span t-field="o.total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                        <td class="text-right" style="border-left: solid black 1px; border-bottom: solid black 1px;">Importe Total</td>
+                                        <td class="text-right" style="border-right: solid black 1px; border-bottom: solid black 1px;"><span t-field="o.total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="footer">
+                        <div class="footer" style="border-top: solid black 1px;">
                             <div class="row">
-                                <div class="col-12 text-center" style="font-size: 8px;">
-                                    <span>Revise la conformidad de su mercadería en el momento de la recepción, una vez aceptada no se aceptan cambios ni devoluciones</span>
+                                <div class="col-12 text-center" style="font-size: 10px;">
+                                    Revise la conformidad de su mercadería en el momento de la recepción, una vez aceptada no se aceptan cambios ni devoluciones.
                                 </div>
                             </div>
                         </div>
