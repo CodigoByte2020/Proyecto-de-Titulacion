@@ -24,7 +24,8 @@
         'wizards/reporte_venta_wizard_views.xml',
         # REPORTS:
         # 'reports/invoice_report.xml',
-        'reports/invoice_report2.xml'
+        'reports/invoice_report2.xml',
+        'views/producto_views.xml'
     ],
     'installable': True,
 }

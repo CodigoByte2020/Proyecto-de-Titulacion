@@ -13,12 +13,13 @@ class Producto(models.Model):
 
     name = fields.Char(string='Nombre', required=True)
     # precio_compra = fields.Float(string='Precio de compra')
-    precio_venta = fields.Float(string='Precio de venta', group_operator=False)
+    precio_venta = fields.Float(string='Precio de venta', required=True, group_operator=False)
     comentario = fields.Text(string='Comentario',
                              help='Utilize este campo para especificar detalles extras del producto.')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
-    unidad_medida = fields.Selection(selection=UNIDAD_MEDIDA_SELECTION, default='unit', string='Unidad de medida')
-    code = fields.Char(string='Código')
+    unidad_medida = fields.Selection(selection=UNIDAD_MEDIDA_SELECTION, string='Unidad de medida',
+                                     required=True)
+    code = fields.Char(string='Código', required=True)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'El Nombre ya existe !'),

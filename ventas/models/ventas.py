@@ -98,10 +98,9 @@ class DetalleVentas(models.Model):
     venta_id = fields.Many2one('ventas', string='Venta', required=True)
     producto_id = fields.Many2one('base.producto', string='Producto', required=True)
     cantidad = fields.Float(string='Cantidad')
-    precio_venta = fields.Float(related='producto_id.precio_venta', string='Precio unitario')
+    precio_venta = fields.Float(compute='_compute_precio_venta', string='Precio unitario')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
-
 
     # FIXME:
     #  INVESTIGAR UNA POSIBLE SOLUCIÓN PARA QUE LOS CAMPOS DE TOTALES DE VENTA SE MODIFIQUEN DESDE LA INTERFAZ AL
@@ -120,6 +119,15 @@ class DetalleVentas(models.Model):
     # def _onchange_subtotal(self):
     #     for line in self:
     #         line.update(line._get_price_subtotal())
+
+    @api.depends('producto_id')
+    def _compute_precio_venta(self):
+        for rec in self:
+            sales_price_history_ids = rec.producto_id.sales_price_history_ids.filtered(
+                lambda x: x.modified_date <= rec.venta_id.fecha)
+            new_price = sales_price_history_ids and sales_price_history_ids.sorted(
+                key=lambda x: x.modified_date)[-1].new_price
+            rec.update({'precio_venta': new_price})
 
     @api.depends('cantidad', 'precio_venta')
     def _compute_subtotal(self):
