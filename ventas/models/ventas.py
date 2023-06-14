@@ -26,7 +26,7 @@ class Ventas(models.Model):
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
     tipo_venta = fields.Selection(TIPO_VENTA_SELECTION, default='contado', required=True, string='Tipo de venta')
-    fecha = fields.Date(default=fields.Date.today(), string='Fecha')
+    fecha = fields.Date(default=fields.Date.today(), readonly=True, string='Fecha')
     amount_untaxed = fields.Float(compute='_compute_total', store=True, string='Ope. Gravadas')
     amount_tax = fields.Float(compute='_compute_total', store=True, string='IGV 18%')
     total = fields.Float(compute='_compute_total', store=True, string='Importe Total')

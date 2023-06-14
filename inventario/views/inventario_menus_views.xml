@@ -10,17 +10,6 @@
                   parent="inventario_menu_root"
                   sequence="10"
         />
-        <menuitem id="movimientos_menu"
-                  name="Movimientos"
-                  parent="inventario_menu_root"
-                  sequence="20"
-        />
-        <menuitem id="ajustes_menu"
-                  name="Ajustes"
-                  parent="inventario_menu_root"
-                  sequence="30"
-                  groups="estructura_base.estructura_base_group_administrador"
-        />
         <menuitem id="reportes_menu"
                   name="Reportes"
                   parent="inventario_menu_root"

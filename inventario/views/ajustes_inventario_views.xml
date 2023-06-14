@@ -47,14 +47,16 @@
     </record>
 
     <record id="ajustes_inventario_action" model="ir.actions.act_window">
-        <field name="name">Inventario</field>
+        <field name="name">Ajustes de Inventario</field>
         <field name="res_model">ajustes.inventario</field>
         <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="ajustes_inventario_menu"
-              name="Inventario"
+              name="Ajustes de Inventario"
               action="ajustes_inventario_action"
-              sequence="10"
-              parent="ajustes_menu"/>
+              sequence="30"
+              parent="inventario_menu_root"
+              groups="estructura_base.estructura_base_group_administrador"
+    />
 </odoo>

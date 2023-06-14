@@ -39,4 +39,4 @@ class SalesPriceHistory(models.Model):
     old_price = fields.Monetary(string='Precio antiguo', currency_field='currency_id')
     new_price = fields.Monetary(string='Precio nuevo', currency_field='currency_id')
     modified_date = fields.Date(string='Fecha de modificación')
-    currency_id = fields.Many2one(related='product_id.currency_id')
+    currency_id = fields.Many2one(related='product_id.currency_id', store=True)

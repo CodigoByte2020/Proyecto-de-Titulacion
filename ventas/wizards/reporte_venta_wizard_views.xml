@@ -49,16 +49,16 @@
     </record>
 
     <record id="reporte_venta_wizard_view_form_action" model="ir.actions.act_window">
-        <field name="name">Reporte de ventas</field>
+        <field name="name">Reporte</field>
         <field name="res_model">reporte.venta.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
 
-    <menuitem id="reportes_ventas_menu"
-              name="Reporte de ventas"
+    <menuitem id="reporte_ventas_menu"
+              name="Reporte"
               action="reporte_venta_wizard_view_form_action"
-              parent="reportes_menu"
-              sequence="10"
+              parent="ventas_menu_root"
+              sequence="30"
     />
 </odoo>

@@ -36,9 +36,10 @@
         <field name="view_mode">tree</field>
     </record>
 
-    <menuitem id="movimientos_movimientos_menu"
-              name="Movimientos de Inventario"
+    <menuitem id="movimientos_inventario_menu"
+              name="Movimientos"
               action="movimientos_action"
-              sequence="10"
-              parent="movimientos_menu"/>
+              sequence="20"
+              parent="inventario_menu_root"
+    />
 </odoo>

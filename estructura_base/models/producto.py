@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 UNIDAD_MEDIDA_SELECTION = [
     ('unit', 'Unidad'),
@@ -23,4 +24,11 @@ class Producto(models.Model):
 
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'El Nombre ya existe !'),
+        ('code_uniq', 'unique(code)', 'El Código ya existe !'),  # ??? REVISAR PORQUE NO FUNCIONA LA VALIDACIÓN
     ]
+
+    @api.constrains('precio_venta')
+    def _check_precio_venta(self):
+        for product in self:
+            if product.precio_venta > 100:
+                raise ValidationError('El precio de venta ha excedido el límite !!!')

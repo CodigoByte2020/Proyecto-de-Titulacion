@@ -15,11 +15,6 @@
 <!--                  parent="ventas_menu_root"-->
 <!--                  sequence="20"-->
 <!--        />-->
-        <menuitem id="reportes_menu"
-                  name="Reportes"
-                  parent="ventas_menu_root"
-                  sequence="30"
-        />
 <!--        <menuitem id="configuracion_menu"-->
 <!--                  name="Configuración"-->
 <!--                  parent="ventas_menu_root"-->
