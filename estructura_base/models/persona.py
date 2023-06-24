@@ -15,6 +15,7 @@ TIPO_DOCUMENTO_SELECTION = [
 dni_validator = re.compile(r'^\d{8}$')
 ce_validator = re.compile(r'^\d{9}$')
 ruc_validator = re.compile(r'^\d{11}$')
+email_re = re.compile(r"""([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63})""")
 
 
 class Persona(models.Model):
@@ -55,6 +56,14 @@ class Persona(models.Model):
 
     def name_get(self):
         return [(rec.id, f'{rec.name} - {rec.numero_documento}') for rec in self]
+
+    @api.onchange('email')
+    def _onchange_email(self):
+        if self.email and not email_re.match(self.email):
+            return {
+                'warning': {'title': 'ERROR', 'message': 'Formato de Email no válido. !!!'},
+                'value': {'email': False}
+            }
 
     def consult_data(self):
         url = f'https://api.apis.net.pe/v1/{self.tipo_documento}'

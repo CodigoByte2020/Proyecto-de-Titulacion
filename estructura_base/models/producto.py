@@ -23,8 +23,8 @@ class Producto(models.Model):
     code = fields.Char(string='Código', required=True)
 
     _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'El Nombre ya existe !'),
-        ('code_uniq', 'unique(code)', 'El Código ya existe !'),  # ??? REVISAR PORQUE NO FUNCIONA LA VALIDACIÓN
+        ('name_uniq', 'unique(name)', 'El Nombre ya existe !!!'),
+        ('code_uniq', 'unique(code)', 'El Código ya existe !!!')
     ]
 
     @api.constrains('precio_venta')

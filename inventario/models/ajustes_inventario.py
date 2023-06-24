@@ -1,5 +1,6 @@
 import datetime
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.estructura_base.models.constantes import (
     PENDIENTE,
@@ -67,3 +68,9 @@ class DetalleAjustesInventario(models.Model):
         rec = super(DetalleAjustesInventario, self).create(values)
         self.crear_movimientos(rec)
         return rec
+
+    @api.constrains('cantidad')
+    def _check_cantidad(self):
+        for rec in self:
+            if rec.cantidad > 100:
+                raise ValidationError('La Cantidad ha excedido el límite !!!')
