@@ -15,4 +15,12 @@
         <field name="padding">8</field>
         <field name="company_id" eval="False"/>
     </record>
+
+    <record id="credit_note_seq" model="ir.sequence">
+        <field name="name">Secuencia de Notas de Crédito</field>
+        <field name="code">credit.note</field>
+        <field name="prefix">NC01-</field>
+        <field name="padding">8</field>
+        <field name="company_id" eval="False"/>
+    </record>
 </odoo>

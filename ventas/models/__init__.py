@@ -5,3 +5,4 @@ from . import credito_alerta
 from . import persona
 # from . import impuestos
 from . import sales_price_history
+from . import credit_note

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="credit_note_view_tree" model="ir.ui.view">
+        <field name="name">credit.note.view.tree</field>
+        <field name="model">credit.note</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="state == 'applied'" decoration-bf="state == 'applied'">
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="fecha"/>
+                <field name="type_credit_note"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="credit_note_view_form" model="ir.ui.view">
+        <field name="name">credit.note.view.form</field>
+        <field name="model">credit.note</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="load_invoices" string="Cargar facturas" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <field name="state" invisible="1"/>
+                    <widget name="web_ribbon" title="Aplicada" bg_color="bg-danger" attrs="{'invisible': [('state', '!=', 'applied')]}"/>
+                    <group>
+                        <group>
+                            <field name="cliente_id"/>
+                            <field name="document_number"/>
+                        </group>
+                        <group>
+                            <field name="fecha"/>
+                            <field name="type_credit_note"/>
+                            <field name="motivo"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Productos">
+                            <field name="detalle_ventas_ids">
+                                <tree editable="bottom">
+                                    <field name="venta_id" invisible="1"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="name_venta" string="Factura" class="font-weight-bold"/>
+                                    <field name="producto_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
+                                    <field name="cantidad"/>
+                                    <field name="precio_venta" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="subtotal" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group col="6">
+                        <group colspan="4">
+                            <field name="comentarios" nolabel="1" placeholder="Términos y condiciones ..."/>
+                        </group>
+                        <group class="oe_subtotal_footer oe_right" colspan="2">
+                            <field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                            <field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                            <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                <label for="total" />
+                            </div>
+                            <field name="total" nolabel="1" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="credit_note_action" model="ir.actions.act_window">
+        <field name="name">Nota de Crédito</field>
+        <field name="res_model">credit.note</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="credit_note_menu"
+              name="Nota de Crédito"
+              action="credit_note_action"
+              parent="ventas_menu_root"
+              sequence="20"
+    />
+</odoo>

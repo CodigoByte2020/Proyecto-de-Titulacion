@@ -22,6 +22,10 @@ class Ventas(models.Model):
     _name = 'ventas'
     _description = 'Registro de ventas'
 
+    # def _domain_credit_note_id(self):
+    #     credit_notes = self.env['credit.note'].search([('cliente_id', '=', self.cliente_id.id)])
+    #     return [('id', 'in', credit_notes.ids)]
+
     name = fields.Char(string='Número', default='/', copy=False)
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
@@ -39,6 +43,9 @@ class Ventas(models.Model):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, string='Moneda')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
     type_document = fields.Selection(TYPE_DOCUMENT_SELECTION, default='invoice', string='Tipo de documento')
+    # apply_credit_note = fields.Boolean(default=False, string='¿Aplica Nota de Crédito?')
+    credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito')
+    total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento')
 
     # Crea un registro de movimiento de crédito de cliente por venta.
     # def action_set_confirm(self):
@@ -61,6 +68,11 @@ class Ventas(models.Model):
     #             'credito_cliente_id': last_credit_movement.credito_cliente_id.id
     #         })
 
+    def _set_credit_note_state(self, values):
+        credit_note_id = self.env['credit.note'].browse(values.get('credit_note_id'))
+        if credit_note_id:
+            credit_note_id.update({'state': 'applied'})
+
     @api.model
     def create(self, values):
         if values.get('name', '/') == '/':
@@ -69,7 +81,14 @@ class Ventas(models.Model):
                     self._name, sequence_date=None) or '/'
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
+        self._set_credit_note_state(values)
         return super(Ventas, self).create(values)
+
+    def write(self, values):
+        self._set_credit_note_state(values)
+        if self.credit_note_id:
+            self.credit_note_id.update({'state': 'not_applied'})
+        return super(Ventas, self).write(values)
 
     @api.constrains('tipo_venta')
     def _check_tipo_venta(self):
@@ -79,6 +98,20 @@ class Ventas(models.Model):
                 if not credito:
                     raise ValidationError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
 
+    # FIXME: REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO NO FUNCIONA
+    @api.onchange('cliente_id')
+    def _onchange_cliente_id(self):
+        self.update({'credit_note_id': False})
+        if self.cliente_id:
+            credit_notes = self.env['credit.note'].search([('cliente_id', '=', self.cliente_id.id)])
+            return {'domain': {'credit_note_id': [('id', 'in', credit_notes.ids)]}}
+        return {'domain': {'credit_note_id': [('id', '=', -1)]}}
+
+    # @api.onchange('apply_credit_note')
+    # def _onchange_apply_credit_note(self):
+    #     if not self.apply_credit_note:
+    #         self.update({'credit_note_id': False})
+
     @api.depends('detalle_ventas_ids.subtotal')
     def _compute_total(self):
         for move in self:
@@ -87,7 +120,8 @@ class Ventas(models.Model):
             move.update({
                 'amount_untaxed': total - amount_tax,
                 'amount_tax': amount_tax,
-                'total': total
+                # 'total': total
+                'total': total - self.total_credit_note
             })
 
 
@@ -101,6 +135,7 @@ class DetalleVentas(models.Model):
     precio_venta = fields.Float(compute='_compute_precio_venta', string='Precio unitario')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
+    is_returned = fields.Boolean(default=False, string='Estado')
 
     # FIXME:
     #  INVESTIGAR UNA POSIBLE SOLUCIÓN PARA QUE LOS CAMPOS DE TOTALES DE VENTA SE MODIFIQUEN DESDE LA INTERFAZ AL
@@ -142,6 +177,7 @@ class DetalleVentas(models.Model):
             raise ValidationError(f'No existe suficiente stock de inventario para el Producto {self.producto_id.name}\n'
                                   f'Asegúrese de tener el inventario actualizado para registrar la venta correctamente')
 
+    # FIXME: ERROR PORQUE DESDE NOTA DE CRÉDITO ESTA LLEGANDO MÁS DE UNA VENTA
     def update_validate_stock(self):
         movements_model = self.env['movimientos']
         movement = movements_model.search([('detalle_venta_id', '=', self.id)])
