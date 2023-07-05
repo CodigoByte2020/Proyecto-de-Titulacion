@@ -10,5 +10,5 @@ class CreditNoteWizard(models.TransientModel):
     def load_sale_details(self):
         detalle_ventas_ids = self.env['detalle.ventas'].search([('venta_id', 'in', self.venta_ids.ids)])\
             .sorted(key=lambda x: x.venta_id.id, reverse=True)
-        credit_note_id = self.env['credit.note'].search([('id', '=', self.credit_note_id.id)])
+        credit_note_id = self.env['credit.note'].browse(self.credit_note_id.id)
         credit_note_id.update({'detalle_ventas_ids': [(6, 0, detalle_ventas_ids.ids)]})

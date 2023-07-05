@@ -44,7 +44,6 @@
                                     <field name="cantidad"/>
                                     <field name="precio_venta" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     <field name="subtotal" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="is_returned"/>
                                 </tree>
                             </field>
                             <group class="oe_subtotal_footer">

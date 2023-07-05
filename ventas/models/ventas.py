@@ -6,6 +6,10 @@
 import datetime
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.addons.estructura_base.models.constantes import (
+    CONFIRMADO,
+    UTILIZADO
+)
 
 TIPO_VENTA_SELECTION = [
     ('contado', 'Contado'),
@@ -71,8 +75,9 @@ class Ventas(models.Model):
     def _set_credit_note_state(self, values):
         credit_note_id = self.env['credit.note'].browse(values.get('credit_note_id'))
         if credit_note_id:
-            credit_note_id.update({'state': 'applied'})
+            credit_note_id.update({'state': UTILIZADO})
 
+    # FIXME: REVISAR ESTOS MÉTODOS AL CREAR UNA VENTA (CREATE Y WRITE)
     @api.model
     def create(self, values):
         if values.get('name', '/') == '/':
@@ -87,7 +92,7 @@ class Ventas(models.Model):
     def write(self, values):
         self._set_credit_note_state(values)
         if self.credit_note_id:
-            self.credit_note_id.update({'state': 'not_applied'})
+            self.credit_note_id.update({'state': CONFIRMADO})
         return super(Ventas, self).write(values)
 
     @api.constrains('tipo_venta')
@@ -98,13 +103,22 @@ class Ventas(models.Model):
                 if not credito:
                     raise ValidationError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
 
+    @api.constrains('total_credit_note')
+    def _check_total_credit_note(self):
+        for move in self:
+            total = sum(move.detalle_ventas_ids.mapped('subtotal'))
+            if total <= move.total_credit_note:
+                raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note} y este debe ser '
+                                      f'menor o igual al total de la factura -> {total}.')
+
     # FIXME: REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO NO FUNCIONA
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         self.update({'credit_note_id': False})
         if self.cliente_id:
-            credit_notes = self.env['credit.note'].search([('cliente_id', '=', self.cliente_id.id)])
-            return {'domain': {'credit_note_id': [('id', 'in', credit_notes.ids)]}}
+            return {
+                'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', 'confirmed')]}
+            }
         return {'domain': {'credit_note_id': [('id', '=', -1)]}}
 
     # @api.onchange('apply_credit_note')
@@ -120,7 +134,6 @@ class Ventas(models.Model):
             move.update({
                 'amount_untaxed': total - amount_tax,
                 'amount_tax': amount_tax,
-                # 'total': total
                 'total': total - self.total_credit_note
             })
 
@@ -135,7 +148,6 @@ class DetalleVentas(models.Model):
     precio_venta = fields.Float(compute='_compute_precio_venta', string='Precio unitario')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
-    is_returned = fields.Boolean(default=False, string='Estado')
 
     # FIXME:
     #  INVESTIGAR UNA POSIBLE SOLUCIÓN PARA QUE LOS CAMPOS DE TOTALES DE VENTA SE MODIFIQUEN DESDE LA INTERFAZ AL
@@ -177,7 +189,6 @@ class DetalleVentas(models.Model):
             raise ValidationError(f'No existe suficiente stock de inventario para el Producto {self.producto_id.name}\n'
                                   f'Asegúrese de tener el inventario actualizado para registrar la venta correctamente')
 
-    # FIXME: ERROR PORQUE DESDE NOTA DE CRÉDITO ESTA LLEGANDO MÁS DE UNA VENTA
     def update_validate_stock(self):
         movements_model = self.env['movimientos']
         movement = movements_model.search([('detalle_venta_id', '=', self.id)])
@@ -189,10 +200,10 @@ class DetalleVentas(models.Model):
 
     def create_movement(self):
         movements_model = self.env['movimientos']
-        last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)],
-                                               order='create_date DESC', limit=1)
+        last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)], order='create_date DESC',
+                                               limit=1)
         movements_model.create({
-            'detalle_venta_id': self.id,
+            'detalle_venta_id': [(4, self.id, False)],
             'tipo': 'out',
             'user_id': self.venta_id.user_id.id,
             'fecha': datetime.datetime.now(),
@@ -230,4 +241,4 @@ class DetalleVentas(models.Model):
 class Movimientos(models.Model):
     _inherit = 'movimientos'
 
-    detalle_venta_id = fields.Many2one('detalle.ventas')
+    detalle_venta_id = fields.Many2many('detalle.ventas')

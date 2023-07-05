@@ -1,8 +1,14 @@
 from datetime import datetime, date, timedelta
-import pytz
-from dateutil.relativedelta import relativedelta
+from itertools import groupby
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.addons.estructura_base.models.constantes import (
+    BORRADOR,
+    CONFIRMADO,
+    UTILIZADO,
+    CANCELADO,
+    STATE_NOTE_SELECTION
+)
+
 
 TYPE_CREDIT_NOTE_SELECTION = [
     ('01', 'Anulación de la operación'),
@@ -32,11 +38,8 @@ class CreditNote(models.Model):
     amount_tax = fields.Float(compute='_compute_total', store=True, string='IGV 18%')
     total = fields.Float(compute='_compute_total', store=True, string='Importe Total')
     comentarios = fields.Text(string='Comentarios')
-    state = fields.Selection(
-        [('applied', 'Aplicada'), ('not_applied', 'No aplicada')],
-        default='not_applied',
-        string='Estado'
-    )
+    state = fields.Selection(STATE_NOTE_SELECTION, default=BORRADOR, string='Estado')
+    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
 
     @api.depends('detalle_ventas_ids.subtotal')
     def _compute_total(self):
@@ -53,14 +56,13 @@ class CreditNote(models.Model):
         range_days = self._get_range_days()
         return self.env['ventas'].search([
             ('cliente_id.numero_documento', '=', self.document_number),
-            ('fecha', 'in', range_days)
+            ('fecha', 'in', range_days),
+            ('credit_note_id', '=', False)
         ]).sorted(key=lambda x: x.fecha, reverse=True)
 
-    def _get_range_days(self):
-        # day = fields.Date.today()
+    @staticmethod
+    def _get_range_days():
         today = datetime.date(datetime.today())
-        # last_day = today - timedelta(days=15)
-        # range_dates = [today - timedelta(days=day) for day in range(16)]
         range_date = []
         day = 0
         while len(range_date) <= 15:
@@ -87,13 +89,6 @@ class CreditNote(models.Model):
             }
         }
 
-    # FIXME: REVISAR ESTÉ MÉTODO, ESTA DANDO ERROR AL CREAR MOVIMIENTO PORQUE ESTA MANDANDO MAS DE UNA VENTA
-    def _set_is_returned_detalle_ventas(self, values):
-        detalle_ventas_ids = values.get('detalle_ventas_ids')[0][2]
-        detalle_ventas = self.env['detalle.ventas'].browse(detalle_ventas_ids)
-        if detalle_ventas:
-            detalle_ventas.mapped(lambda x: x.update({'is_returned': True}))
-
     @api.model
     def create(self, values):
         if values.get('name', '/') == '/':
@@ -102,14 +97,31 @@ class CreditNote(models.Model):
                     self._name, sequence_date=None) or '/'
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
-        # self._set_is_returned_detalle_ventas(values)
         return super(CreditNote, self).create(values)
 
-    def write(self, values):
-        self._set_is_returned_detalle_ventas(values)
-        if self.detalle_ventas_ids:
-            self.detalle_ventas_ids.mapped(lambda x: x.update({'is_returned': False}))
-        return super(CreditNote, self).write(values)
+    def action_set_confirm(self):
+        self.update({'state': CONFIRMADO})
+        sorted_sales_detail = self.detalle_ventas_ids.sorted(key=lambda x: x.producto_id.id)
+        grouped_sales_detail = [(key, list(group)) for key, group in
+                                groupby(sorted_sales_detail, key=lambda x: x.producto_id.id)]
+
+        movements_model = self.env['movimientos']
+        for product_id, values in grouped_sales_detail:
+            last_movement = movements_model.search([('producto_id', '=', product_id)], order='create_date DESC',
+                                                   limit=1)
+            quantity = sum(x.cantidad for x in values)
+            movements_model.create({
+                'detalle_venta_id': [(4, sale_detail.id) for sale_detail in values],
+                'tipo': 'in',
+                'user_id': self.user_id.id,
+                'fecha': datetime.now(),
+                'producto_id': product_id,
+                'cantidad': quantity,
+                'total': last_movement.total + quantity,
+            })
+
+    def action_cancel(self):
+        self.update({'state': CANCELADO})
 
 
 class DetalleVentas(models.Model):
