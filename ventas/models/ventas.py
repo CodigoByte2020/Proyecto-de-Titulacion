@@ -26,10 +26,6 @@ class Ventas(models.Model):
     _name = 'ventas'
     _description = 'Registro de ventas'
 
-    # def _domain_credit_note_id(self):
-    #     credit_notes = self.env['credit.note'].search([('cliente_id', '=', self.cliente_id.id)])
-    #     return [('id', 'in', credit_notes.ids)]
-
     name = fields.Char(string='Número', default='/', copy=False)
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
@@ -47,7 +43,6 @@ class Ventas(models.Model):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, string='Moneda')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
     type_document = fields.Selection(TYPE_DOCUMENT_SELECTION, default='invoice', string='Tipo de documento')
-    # apply_credit_note = fields.Boolean(default=False, string='¿Aplica Nota de Crédito?')
     credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito')
     total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento')
 
@@ -116,15 +111,8 @@ class Ventas(models.Model):
     def _onchange_cliente_id(self):
         self.update({'credit_note_id': False})
         if self.cliente_id:
-            return {
-                'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', 'confirmed')]}
-            }
+            return {'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', CONFIRMADO)]}}
         return {'domain': {'credit_note_id': [('id', '=', -1)]}}
-
-    # @api.onchange('apply_credit_note')
-    # def _onchange_apply_credit_note(self):
-    #     if not self.apply_credit_note:
-    #         self.update({'credit_note_id': False})
 
     @api.depends('detalle_ventas_ids.subtotal')
     def _compute_total(self):
@@ -148,24 +136,7 @@ class DetalleVentas(models.Model):
     precio_venta = fields.Float(compute='_compute_precio_venta', string='Precio unitario')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
-
-    # FIXME:
-    #  INVESTIGAR UNA POSIBLE SOLUCIÓN PARA QUE LOS CAMPOS DE TOTALES DE VENTA SE MODIFIQUEN DESDE LA INTERFAZ AL
-    #  CAMBIAR UN LINEA DE DETALLE
-    # def _get_price_subtotal(self, cantidad=None, precio_venta=None):
-    #     self.ensure_one()
-    #     return self._get_price_subtotal_model(cantidad=cantidad or self.cantidad, precio_venta=precio_venta or self.precio_venta)
-    #
-    # @api.model
-    # def _get_price_subtotal_model(self, cantidad, precio_venta):
-    #     subtotal = cantidad * precio_venta
-    #     res = {'subtotal': subtotal}
-    #     return res
-    #
-    # @api.onchange('cantidad', 'precio_venta')
-    # def _onchange_subtotal(self):
-    #     for line in self:
-    #         line.update(line._get_price_subtotal())
+    name_venta = fields.Char(related='venta_id.name')
 
     @api.depends('producto_id')
     def _compute_precio_venta(self):

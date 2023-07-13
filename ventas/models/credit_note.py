@@ -4,8 +4,6 @@ from odoo import api, fields, models
 from odoo.addons.estructura_base.models.constantes import (
     BORRADOR,
     CONFIRMADO,
-    UTILIZADO,
-    CANCELADO,
     STATE_NOTE_SELECTION
 )
 
@@ -119,12 +117,3 @@ class CreditNote(models.Model):
                 'cantidad': quantity,
                 'total': last_movement.total + quantity,
             })
-
-    def action_cancel(self):
-        self.update({'state': CANCELADO})
-
-
-class DetalleVentas(models.Model):
-    _inherit = 'detalle.ventas'
-
-    name_venta = fields.Char(related='venta_id.name')

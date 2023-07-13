@@ -49,7 +49,6 @@
                             <group class="oe_subtotal_footer">
                                 <field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                                <!--                     <field name="apply_credit_note" widget="boolean_toggle"/>-->
                                 <field name="total_credit_note"/>
                                 <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                     <label for="total"/>

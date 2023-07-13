@@ -13,6 +13,5 @@ STATE_SELECTION = [
 STATE_NOTE_SELECTION = [
     (BORRADOR, 'Borrador'),
     (CONFIRMADO, 'Confirmado'),
-    (UTILIZADO, 'Utilizado'),
-    (CANCELADO, 'Cancelado')
+    (UTILIZADO, 'Utilizado')
 ]

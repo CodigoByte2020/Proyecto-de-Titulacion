@@ -4,7 +4,6 @@
         <field name="name">credit.note.view.tree</field>
         <field name="model">credit.note</field>
         <field name="arch" type="xml">
-<!--            <tree decoration-danger="state == 'applied'" decoration-bf="state == 'applied'">-->
             <tree>
                 <field name="name"/>
                 <field name="cliente_id"/>
@@ -23,15 +22,14 @@
                 <header>
                     <button name="load_invoices" type="object" string="Cargar facturas" class="btn-primary"
                             attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
+                    <button name="action_set_confirm" type="object" string="Confirmar" class="btn-primary"
                             attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <button name="action_cancel" type="object" string="Cancelar" class="btn btn-secondary"
-                            attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,used,cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,used"/>
                 </header>
                 <sheet>
-<!--                    <field name="state" invisible="1"/>-->
-<!--                    <widget name="web_ribbon" title="Aplicada" bg_color="bg-danger" attrs="{'invisible': [('state', '!=', 'applied')]}"/>-->
+                    <widget name="web_ribbon" title="Borrador" bg_color="bg-dark" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <widget name="web_ribbon" title="Confirmado" bg_color="bg-info" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                    <widget name="web_ribbon" title="Utilizado" bg_color="bg-success" attrs="{'invisible': [('state', '!=', 'used')]}"/>
                     <group>
                         <group>
                             <field name="cliente_id"/>
