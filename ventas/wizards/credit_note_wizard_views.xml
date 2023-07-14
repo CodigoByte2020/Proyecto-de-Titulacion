@@ -6,15 +6,12 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-<!--                    <group>-->
-<!--                        <field name="credit_note_id" invisible="1"/>-->
-<!--                    </group>-->
                     <h3 class="text-danger">
                         IMPORTANTE:
                         <br/>
                         Si no logra visualizar la Factura o Boleta es por la siguiente razón:
                         <br/>
-                        Sólo se puede emitir la nota de crédito hasta el décimo quinto día hábil despúes de haber emitido la Factura o Boleta.
+                        - Sólo se puede emitir la nota de crédito hasta el décimo quinto día hábil despúes de haber emitido la Factura o Boleta.
                     </h3>
                     <br/>
 <!--                    <field name="venta_ids" widget="many2many_tags" readonly="1"/>-->

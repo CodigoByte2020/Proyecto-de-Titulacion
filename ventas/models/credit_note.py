@@ -1,5 +1,8 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from itertools import groupby
+from odoo.exceptions import ValidationError
+
+from odoo.addons.estructura_base.models.constantes import UTILIZADO
 from odoo import api, fields, models
 from odoo.addons.estructura_base.models.constantes import (
     BORRADOR,
@@ -51,10 +54,9 @@ class CreditNote(models.Model):
             })
 
     def _get_ventas(self):
-        range_days = self._get_range_days()
         return self.env['ventas'].search([
             ('cliente_id.numero_documento', '=', self.document_number),
-            ('fecha', 'in', range_days),
+            ('fecha', 'in', self._get_range_days()),
             ('credit_note_id', '=', False)
         ]).sorted(key=lambda x: x.fecha, reverse=True)
 
@@ -97,7 +99,17 @@ class CreditNote(models.Model):
                 values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
         return super(CreditNote, self).create(values)
 
+    # TODO:
+    #  - VALIDAMOS QUE UNA LÍNEA DE VENTA, NO SE ENCUENTRE EN LAS LÍNEAS DE ALGUNA NOTA DE CRÉDITO EN ESTADO CONFIRMADO
+    #    O UTILIZADO.
     def action_set_confirm(self):
+        credit_note_model = self.env['credit.note']
+        confirmed_credit_note = credit_note_model.search([('state', 'in', (CONFIRMADO, UTILIZADO))])
+        some_item_found = set(self.detalle_ventas_ids.ids) & set(confirmed_credit_note.detalle_ventas_ids.ids)
+        if some_item_found:
+            raise ValidationError(f'Existen Productos en otras notas de crédito que están en estado Confirmado o '
+                                  f'Utilizado')
+
         self.update({'state': CONFIRMADO})
         sorted_sales_detail = self.detalle_ventas_ids.sorted(key=lambda x: x.producto_id.id)
         grouped_sales_detail = [(key, list(group)) for key, group in
