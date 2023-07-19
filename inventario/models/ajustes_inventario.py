@@ -50,6 +50,7 @@ class DetalleAjustesInventario(models.Model):
     cantidad = fields.Float(string='Cantidad')
     ajuste_inventario_id = fields.Many2one('ajustes.inventario', string='Ajuste inventario')
 
+    # FIXME: CHEKEAR LA FUNCIONALIDAD DE ESTE MÉTODO
     def crear_movimientos(self, rec):
         domain = [('id', '=', rec.ajuste_inventario_id.id), ('state', '=', CONFIRMADO)]
         inventario = self.env['ajustes.inventario'].search(domain)
@@ -63,6 +64,7 @@ class DetalleAjustesInventario(models.Model):
                 'total': rec.cantidad
             })
 
+    # FIXME: CHEKEAR LA FUNCIONALIDAD DE ESTE MÉTODO
     @api.model
     def create(self, values):
         rec = super(DetalleAjustesInventario, self).create(values)

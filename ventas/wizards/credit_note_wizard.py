@@ -9,8 +9,8 @@ class CreditNoteWizard(models.TransientModel):
     credit_note_id = fields.Many2one('credit.note')
 
     # TODO:
-    #  - UNA LÍNEA DE NOTA DE CRÉDITO SOLO PUEDE ESTAR MÁS DE UNA VEZ EN ALGUNA NOTA DE CRÉDITO QUE SE ENCUENTRE EN
-    #    ESTADO BORRADOR.
+    #  - UNA LÍNEA DE DETALLE DE VENTA PUEDE ESTAR EN VARIAS NOTAS DE CRÉDITO EN ESTADO BORRADOR, PERO NO EN ESTADO
+    #    CONFIRMADO O UTILIZADO.
     def load_sale_details(self):
         credit_note_model = self.env['credit.note']
         confirmed_credit_note = credit_note_model.search([('state', 'in', (CONFIRMADO, UTILIZADO))])

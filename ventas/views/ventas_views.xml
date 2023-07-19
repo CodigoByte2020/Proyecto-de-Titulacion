@@ -31,7 +31,7 @@
                         <group>
                             <field name="currency_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
                             <field name="fecha"/>
-                            <field name="credit_note_id" options="{'no_open': True, 'no_create': True, 'no_edit': True}"/>
+                            <field name="credit_note_id" options="{'no_create': True, 'no_edit': True}"/>
                         </group>
                     </group>
                     <notebook>

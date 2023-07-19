@@ -100,8 +100,8 @@ class CreditNote(models.Model):
         return super(CreditNote, self).create(values)
 
     # TODO:
-    #  - VALIDAMOS QUE UNA LÍNEA DE VENTA, NO SE ENCUENTRE EN LAS LÍNEAS DE ALGUNA NOTA DE CRÉDITO EN ESTADO CONFIRMADO
-    #    O UTILIZADO.
+    #  - VALIDAMOS QUE UNA LÍNEA DE DETALLE DE VENTA, NO SE ENCUENTRE EN LAS LÍNEAS DE ALGUNA NOTA DE CRÉDITO EN ESTADO
+    #    CONFIRMADO O UTILIZADO.
     def action_set_confirm(self):
         credit_note_model = self.env['credit.note']
         confirmed_credit_note = credit_note_model.search([('state', 'in', (CONFIRMADO, UTILIZADO))])

@@ -26,6 +26,11 @@ class Ventas(models.Model):
     _name = 'ventas'
     _description = 'Registro de ventas'
 
+    # @api.model
+    # def _domain_credit_note_id(self):
+    #     active_id = self.env.context.get('active_id')
+    #     return []
+
     name = fields.Char(string='Número', default='/', copy=False)
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
@@ -106,13 +111,40 @@ class Ventas(models.Model):
                 raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note} y este debe ser '
                                       f'menor o igual al total de la factura -> {total}.')
 
+    # @api.constrains('credit_note_id')
+    # def _check_credit_note_id(self):
+    #     for move in self:
+    #         if move.cliente_id.id != move.credit_note_id.cliente_id.id or move.credit_note_id.state != CONFIRMADO:
+    #             raise ValidationError('La Nota de Crédito es incorrecta, por favor elija otra. !!!')
+
     # FIXME: REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO NO FUNCIONA
+    # PREGUNTAR A JUAN DIEGO
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         self.update({'credit_note_id': False})
         if self.cliente_id:
             return {'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', CONFIRMADO)]}}
         return {'domain': {'credit_note_id': [('id', '=', -1)]}}
+
+    # @api.model
+    # def model_function(self):
+    #     print('@api.model')
+
+    # def read(self, fields, load='_classic_read'):
+    #     """ Without this call, dynamic fields build by fields_view_get()
+    #         generate a log warning, i.e.:
+    #         odoo.models:mass.editing.wizard.read() with unknown field 'myfield'
+    #         odoo.models:mass.editing.wizard.read()
+    #             with unknown field 'selection__myfield'
+    #     """
+    #     real_fields = fields
+    #     if fields:
+    #         # We remove fields which are not in _fields
+    #         real_fields = [x for x in fields if x in self._fields]
+    #     result = super(Ventas, self).read(real_fields, load=load)
+    #     # adding fields to result
+    #     [result[0].update({x: False}) for x in fields if x not in real_fields]
+    #     return result
 
     @api.depends('detalle_ventas_ids.subtotal')
     def _compute_total(self):
