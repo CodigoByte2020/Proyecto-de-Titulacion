@@ -1,7 +1,7 @@
-"id","categoria_id/id","name","precio_venta"
-"base_producto_001","categoria_producto_001","Lays","1.0"
-"base_producto_002","categoria_producto_001","Chizito","1.2"
-"base_producto_003","categoria_producto_001","Chesse Tres","0.8"
-"base_producto_004","categoria_producto_002","Coca Cola 1L","3.0"
-"base_producto_005","categoria_producto_002","Inca Kola 1L","3.2"
-"base_producto_006","categoria_producto_002","Pilsen Trujillo",5.5"
+"id","categoria_id/id","name","precio_venta","unidad_medida","code"
+"base_producto_001","categoria_producto_001","Lays","1.0","unit",SNA-01
+"base_producto_002","categoria_producto_001","Chizito","1.2","unit",SNA-02
+"base_producto_003","categoria_producto_001","Chesse Tres","0.8","unit",SNA-03
+"base_producto_004","categoria_producto_002","Coca Cola 1L","3.0","unit",BEB-01
+"base_producto_005","categoria_producto_002","Inca Kola 1L","3.2","unit",BEB-02
+"base_producto_006","categoria_producto_002","Pilsen Trujillo",5.5","unit",BEB-03

@@ -39,6 +39,11 @@ class Persona(models.Model):
         ('name_uniq', 'unique(numero_documento)', 'Ya existe un Cliente con el Número de documento ingresado !!!'),
     ]
 
+    @api.model
+    def create(self, values):
+        self.consult_data(values)
+        return super(Persona, self).create(values)
+
     @api.onchange('tipo_documento')
     def _onchange_tipo_documento(self):
         if self.tipo_documento:
@@ -54,9 +59,6 @@ class Persona(models.Model):
             elif self.tipo_documento == 'ruc' and not ruc_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 11 números.')
 
-    def name_get(self):
-        return [(rec.id, f'{rec.name} - {rec.numero_documento}') for rec in self]
-
     @api.onchange('email')
     def _onchange_email(self):
         if self.email and not email_re.match(self.email):
@@ -65,15 +67,20 @@ class Persona(models.Model):
                 'value': {'email': False}
             }
 
-    def consult_data(self):
-        url = f'https://api.apis.net.pe/v1/{self.tipo_documento}'
-        args = {'numero': self.numero_documento}
+    def name_get(self):
+        return [(rec.id, f'{rec.name} - {rec.numero_documento}') for rec in self]
+
+    def consult_data(self, values):
+        tipo_documento = values.get("tipo_documento", self.tipo_documento)
+        numero_documento = values.get("numero_documento", self.numero_documento)
+        url = f'https://api.apis.net.pe/v1/{tipo_documento}'
+        args = {'numero': numero_documento}
         # TRY: CÓDIGO SUCEPTIBLE A ERROR
         try:
             response = requests.get(url=url, params=args)
         # CAPTURAMOS LA EXEPCIÓN
-        except requests.exceptions.RequestException as e:
-            _logger.info(f'*********************** LA CONEXIÓN FALLO *********************** {e}')
+        except requests.exceptions.RequestException as exception:
+            _logger.info(f'*********************** LA CONEXIÓN FALLO *********************** {exception}')
             raise ValidationError('La conexión falló al consultar datos.')
         # SI NO OCURRE NINGUNA EXEPCIÓN
         else:
@@ -84,20 +91,24 @@ class Persona(models.Model):
                 provincia = response_json.get('provincia', '')
                 estado = response_json.get('estado', '')
                 condicion = response_json.get('condicion', '')
-                self.update({
+                values.update({
                     'name': nombre,
                     'direccion': direccion and provincia and f'{direccion} {provincia} - PERÚ',
                     'estado': estado,
                     'condicion': condicion
                 })
             elif response.status_code == 422:
-                raise ValidationError(f'El Número de documento {self.numero_documento} no cumple con las reglas de '
+                raise ValidationError(f'El Número de documento {numero_documento} no cumple con las reglas de '
                                       f'validación')
             elif response.status_code == 404:
-                raise ValidationError(f'El Número de documento {self.numero_documento} no existe')
+                raise ValidationError(f'El Número de documento {numero_documento} no existe')
 
     def get_type_document_report(self):
         type_document = dict(self._fields['tipo_documento'].selection)
         for key, value in type_document.items():
             if key == self.tipo_documento:
                 return key.upper()
+
+    def write(self, values):
+        self.consult_data(values)
+        return super(Persona, self).write(values)

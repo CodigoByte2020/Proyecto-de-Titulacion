@@ -7,3 +7,5 @@ access_movimientos_credito_cliente,access_movimientos_credito_cliente,model_movi
 access_credito_alerta,access_credito_alerta,model_credito_alerta,base.group_user,1,1,1,1
 access_sales_price_history,access_sales_price_history,model_sales_price_history,base.group_user,1,1,1,1
 access_credit_note,access_credit_note,model_credit_note,base.group_user,1,1,1,1
+access_reporte_venta_wizard,access_reporte_venta_wizard,model_reporte_venta_wizard,base.group_user,1,1,1,1
+access_credit_note_wizard,access_credit_note_wizard,model_credit_note_wizard,base.group_user,1,1,1,1

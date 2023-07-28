@@ -49,7 +49,8 @@ class Ventas(models.Model):
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
     type_document = fields.Selection(TYPE_DOCUMENT_SELECTION, default='invoice', string='Tipo de documento')
     credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito')
-    total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento')
+    total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento nota de crédito')
+    apply_credit_note = fields.Boolean(string='¿Aplicar nota de crédito?', default=False)
 
     # Crea un registro de movimiento de crédito de cliente por venta.
     # def action_set_confirm(self):
@@ -71,29 +72,6 @@ class Ventas(models.Model):
     #             'deuda': deuda_total,
     #             'credito_cliente_id': last_credit_movement.credito_cliente_id.id
     #         })
-
-    def _set_credit_note_state(self, values):
-        credit_note_id = self.env['credit.note'].browse(values.get('credit_note_id'))
-        if credit_note_id:
-            credit_note_id.update({'state': UTILIZADO})
-
-    # FIXME: REVISAR ESTOS MÉTODOS AL CREAR UNA VENTA (CREATE Y WRITE)
-    @api.model
-    def create(self, values):
-        if values.get('name', '/') == '/':
-            if 'company_id' in values:
-                values['name'] = self.env['ir.sequence'].with_context(force_company=values['company_id']).next_by_code(
-                    self._name, sequence_date=None) or '/'
-            else:
-                values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
-        self._set_credit_note_state(values)
-        return super(Ventas, self).create(values)
-
-    def write(self, values):
-        self._set_credit_note_state(values)
-        if self.credit_note_id:
-            self.credit_note_id.update({'state': CONFIRMADO})
-        return super(Ventas, self).write(values)
 
     @api.constrains('tipo_venta')
     def _check_tipo_venta(self):
@@ -118,13 +96,59 @@ class Ventas(models.Model):
     #             raise ValidationError('La Nota de Crédito es incorrecta, por favor elija otra. !!!')
 
     # FIXME: REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO NO FUNCIONA
-    # PREGUNTAR A JUAN DIEGO
+    #  PREGUNTAR A JUAN DIEGO
+
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         self.update({'credit_note_id': False})
         if self.cliente_id:
             return {'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', CONFIRMADO)]}}
         return {'domain': {'credit_note_id': [('id', '=', -1)]}}
+
+    @api.onchange('apply_credit_note')
+    def _onchange_apply_credit_note(self):
+        if not self.apply_credit_note:
+            self.update({'credit_note_id': False})
+
+    @api.onchange('credit_note_id')
+    def _onchange_credit_note_id(self):
+        if not self.credit_note_id:
+            self.update({'total_credit_note': False})
+
+    @api.depends('detalle_ventas_ids.subtotal')
+    def _compute_total(self):
+        for move in self:
+            total = sum(move.detalle_ventas_ids.mapped('subtotal'))
+            amount_tax = total * 0.18
+            move.update({
+                'amount_untaxed': total - amount_tax,
+                'amount_tax': amount_tax,
+                'total': total - self.total_credit_note
+            })
+
+    def _set_credit_note_state(self, values):
+        credit_note_id = self.env['credit.note'].browse(values.get('credit_note_id'))
+        if credit_note_id:
+            credit_note_id.update({'state': UTILIZADO})
+
+    # FIXME: REVISAR ESTOS MÉTODOS AL CREAR UNA VENTA (CREATE Y WRITE)
+    @api.model
+    def create(self, values):
+        if values.get('name', '/') == '/':
+            if 'company_id' in values:
+                values['name'] = self.env['ir.sequence'].with_context(
+                    force_company=values['company_id']).next_by_code(
+                    self._name, sequence_date=None) or '/'
+            else:
+                values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
+        self._set_credit_note_state(values)
+        return super(Ventas, self).create(values)
+
+    def write(self, values):
+        self._set_credit_note_state(values)
+        if self.credit_note_id:
+            self.credit_note_id.update({'state': CONFIRMADO})
+        return super(Ventas, self).write(values)
 
     # @api.model
     # def model_function(self):
@@ -146,17 +170,6 @@ class Ventas(models.Model):
     #     [result[0].update({x: False}) for x in fields if x not in real_fields]
     #     return result
 
-    @api.depends('detalle_ventas_ids.subtotal')
-    def _compute_total(self):
-        for move in self:
-            total = sum(move.detalle_ventas_ids.mapped('subtotal'))
-            amount_tax = total * 0.18
-            move.update({
-                'amount_untaxed': total - amount_tax,
-                'amount_tax': amount_tax,
-                'total': total - self.total_credit_note
-            })
-
 
 class DetalleVentas(models.Model):
     _name = 'detalle.ventas'
@@ -169,6 +182,7 @@ class DetalleVentas(models.Model):
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
     name_venta = fields.Char(related='venta_id.name')
+    credit_note_id = fields.Many2one('credit.note', related='venta_id.credit_note_id')
 
     @api.depends('producto_id')
     def _compute_precio_venta(self):
