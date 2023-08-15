@@ -24,7 +24,8 @@
                             attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                     <button name="action_set_confirm" type="object" string="Confirmar" class="btn-primary"
                             attrs="{'invisible': [('state', '!=', 'draft')]}"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,used"/>
+<!--                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,used"/>-->
+                    <field name="state" widget="statusbar" invisible="1"/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Borrador" bg_color="bg-dark" attrs="{'invisible': [('state', '!=', 'draft')]}"/>

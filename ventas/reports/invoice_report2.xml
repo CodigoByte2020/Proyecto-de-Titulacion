@@ -6,18 +6,23 @@
                     <t t-call="web.basic_layout">
                         <div class="page">
                             <div class="row">
-                                <div class="col-3 text-center">LOGO</div>
+                                <div class="col-3 text-center">
+                                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-width: 90%;" alt="Company Logo"/>
+                                </div>
                                 <div class="col-6 text-center">
                                     <!-- *************************************************************************** -->
 <!--                                    DATOS DEL EMISOR ELECTRÓNICO Y DEL DOCUMENTO-->
-                                    <span t-field="o.company_id.name"/><br/>
+                                    <h1 t-field="o.company_id.name"/><br/>
                                     <span t-field="o.company_id.phone"/> - <span t-field="o.company_id.email"/><br/>
                                     <span t-field="o.company_id.street"/><br/>
+                                    <span t-field="o.company_id.city"/> - <span t-field="o.company_id.country_id.name"/>
                                     <!-- *************************************************************************** -->
                                 </div>
                                 <div class="col-3 text-center" style="border: solid black 2px;">
+                                    <br/>
                                     R.U.C. <span t-field="o.company_id.vat"/><br/>
-                                    <span t-field="o.type_document"/> Electrónica<br/>
+                                    <span t-field="o.type_document"/><br/>
+                                    Electrónica<br/>
                                     <span t-field="o.name"/><br/>
                                 </div>
                             </div>
@@ -62,7 +67,7 @@
                                         </tr>
                                     </t>
                                     <tr>
-                                        <td colspan="4" rowspan="3" class="bg-white"/>
+                                        <td colspan="4" rowspan="4" class="bg-white"/>
                                         <td class="text-right" style="border-left: solid black 1px; border-top: solid black 1px;">Ope. Gravadas:</td>
                                         <td class="text-right" style="border-right: solid black 1px; border-top: solid black 1px;"><span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                     </tr>
@@ -83,7 +88,7 @@
                         </div>
                         <div class="footer" style="border-top: solid black 1px;">
                             <div class="row">
-                                <div class="col-12 text-center" style="font-size: 10px;">
+                                <div class="col-12 text-center" style="font-size: 13px;">
                                     Revise la conformidad de su mercadería en el momento de la recepción, una vez aceptada no se aceptan cambios ni devoluciones.
                                 </div>
                             </div>
