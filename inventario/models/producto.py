@@ -11,7 +11,8 @@ class Producto(models.Model):
     @api.depends('movimiento_ids.total')
     def _compute_stock(self):
         for rec in self:
-            rec.stock = self.env['movimientos'].search([('producto_id', '=', rec.id)], order='fecha DESC', limit=1).total
+            product = self.env['movimientos'].search([('producto_id', '=', rec.id)], order='fecha DESC', limit=1)
+            rec.update({'stock': product.total})
 
 
 class CategoriaProducto(models.Model):
@@ -19,8 +20,7 @@ class CategoriaProducto(models.Model):
     _description = 'Categoría de productos'
 
     name = fields.Char(string='Nombre', required=True)
-    # user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string='Responsable', readonly=True)
 
     _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'El Nombre ya existe !'),
+        ('name_uniq', 'unique(name)', 'El Nombre ya existe. !!!'),
     ]

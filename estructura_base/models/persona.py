@@ -8,7 +8,6 @@ _logger = logging.getLogger(__name__)
 
 TIPO_DOCUMENTO_SELECTION = [
     ('dni', 'Documento nacional de identidad'),
-    ('ce', 'Carnet de extranjería'),
     ('ruc', 'Registro único de contribuyentes')
 ]
 
@@ -22,7 +21,6 @@ class Persona(models.Model):
     _name = 'base.persona'
     _description = 'Clientes y Proveedores'
 
-    # COMPROBAR QUE LOS CLIENTES SIN NOMBRE NO GENEREN PROBLEMAS EN LOS DEMÁS PROCESOS
     name = fields.Char(string='Nombre')
     tipo_documento = fields.Selection(TIPO_DOCUMENTO_SELECTION, string='Tipo de Documento', required=True)
     numero_documento = fields.Char(string='Número de documento', required=True)
@@ -36,7 +34,7 @@ class Persona(models.Model):
     condicion = fields.Char(string='Condición')
 
     _sql_constraints = [
-        ('name_uniq', 'unique(numero_documento)', 'Ya existe un Cliente con el Número de documento ingresado !!!'),
+        ('name_uniq', 'unique(numero_documento)', 'Ya existe un Cliente con el Número de documento ingresado. !!!'),
     ]
 
     @api.model
@@ -54,8 +52,6 @@ class Persona(models.Model):
         if self.numero_documento:
             if self.tipo_documento == 'dni' and not dni_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 8 números.')
-            elif self.tipo_documento == 'ce' and not ce_validator.match(self.numero_documento):
-                raise ValidationError('El Número de documento debe tener 9 números.')
             elif self.tipo_documento == 'ruc' and not ruc_validator.match(self.numero_documento):
                 raise ValidationError('El Número de documento debe tener 11 números.')
 
@@ -71,6 +67,13 @@ class Persona(models.Model):
         return [(rec.id, f'{rec.name} - {rec.numero_documento}') for rec in self]
 
     def consult_data(self, values):
+        """
+        Método para consultar datos de las personas en la siguiente url https://apis.net.pe/
+        :param values: valores para consultar los datos
+        :type values: dict
+        :return: No retorna ningún valor
+        :rtype: None
+        """
         tipo_documento = values.get("tipo_documento", self.tipo_documento)
         numero_documento = values.get("numero_documento", self.numero_documento)
         url = f'https://api.apis.net.pe/v1/{tipo_documento}'
@@ -81,7 +84,7 @@ class Persona(models.Model):
         # CAPTURAMOS LA EXEPCIÓN
         except requests.exceptions.RequestException as exception:
             _logger.info(f'*********************** LA CONEXIÓN FALLO *********************** {exception}')
-            raise ValidationError('La conexión falló al consultar datos.')
+            raise ValidationError('La conexión falló al consultar los datos. !!!')
         # SI NO OCURRE NINGUNA EXEPCIÓN
         else:
             if response.status_code == 200:

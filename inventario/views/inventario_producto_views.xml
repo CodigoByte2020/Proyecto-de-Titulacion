@@ -48,6 +48,7 @@
                             <field name="precio_venta" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="unidad_medida"/>
                             <field name="code"/>
+                            <field name="stock"/>
                         </group>
                     </group>
                     <notebook>

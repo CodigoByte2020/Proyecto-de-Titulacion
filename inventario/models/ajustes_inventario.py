@@ -24,12 +24,12 @@ class AjustesInventario(models.Model):
     fecha = fields.Date(default=fields.Date.today(), string='Fecha', readonly=True)
 
     def action_set_confirm(self):
-        '''
+        """
         Usado para el inventario inicial y crea registro de movimientos para cada una de sus líneas.
         Las líneas de tipo inventario modifican el total de un producto.
         Falta definir como hacer cuando queremos modificar el total de un producto en específico, si debemos
         crear un ajuste de inventario o hacerlo de una manera mas directa. ???
-        '''
+        """
         self.ensure_one()
         self.write({'state': CONFIRMADO})
         for rec in self.detalle_ajuste_inventario_ids:
@@ -50,26 +50,26 @@ class DetalleAjustesInventario(models.Model):
     cantidad = fields.Float(string='Cantidad')
     ajuste_inventario_id = fields.Many2one('ajustes.inventario', string='Ajuste inventario')
 
-    # FIXME: CHEKEAR LA FUNCIONALIDAD DE ESTE MÉTODO
-    def crear_movimientos(self, rec):
-        domain = [('id', '=', rec.ajuste_inventario_id.id), ('state', '=', CONFIRMADO)]
-        inventario = self.env['ajustes.inventario'].search(domain)
-        if inventario:
-            self.env['movimientos'].create({
-                'tipo': 'aj',
-                'user_id': inventario.user_id.id,
-                'fecha': rec.fecha,
-                'producto_id': rec.producto_id.id,
-                'cantidad': rec.cantidad,
-                'total': rec.cantidad
-            })
-
-    # FIXME: CHEKEAR LA FUNCIONALIDAD DE ESTE MÉTODO
-    @api.model
-    def create(self, values):
-        rec = super(DetalleAjustesInventario, self).create(values)
-        self.crear_movimientos(rec)
-        return rec
+    # # FIXME: CHEKEAR LA FUNCIONALIDAD DE ESTE MÉTODO
+    # def crear_movimientos(self, rec):
+    #     domain = [('id', '=', rec.ajuste_inventario_id.id), ('state', '=', CONFIRMADO)]
+    #     inventario = self.env['ajustes.inventario'].search(domain)
+    #     if inventario:
+    #         self.env['movimientos'].create({
+    #             'tipo': 'aj',
+    #             'user_id': inventario.user_id.id,
+    #             'fecha': rec.fecha,
+    #             'producto_id': rec.producto_id.id,
+    #             'cantidad': rec.cantidad,
+    #             'total': rec.cantidad
+    #         })
+    #
+    # # FIXME: CHEKEAR LA FUNCIONALIDAD DE ESTE MÉTODO
+    # @api.model
+    # def create(self, values):
+    #     rec = super(DetalleAjustesInventario, self).create(values)
+    #     self.crear_movimientos(rec)
+    #     return rec
 
     @api.constrains('cantidad')
     def _check_cantidad(self):

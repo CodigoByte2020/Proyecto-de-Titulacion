@@ -23,7 +23,6 @@ class Producto(models.Model):
         if precio_venta:
             values.update({
                 'sales_price_history_ids': [(0, 0, {
-                    'product_id': self.id,
                     'old_price': self.precio_venta,
                     'new_price': precio_venta,
                     'modified_date': fields.Date.today()
