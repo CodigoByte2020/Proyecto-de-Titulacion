@@ -85,7 +85,7 @@ class Ventas(models.Model):
     def _check_total_credit_note(self):
         for move in self:
             total = sum(move.detalle_ventas_ids.mapped('subtotal'))
-            if total <= move.total_credit_note:
+            if move.total_credit_note > total:
                 raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note} y este debe ser '
                                       f'menor o igual al total de la factura -> {total}.')
 
@@ -199,28 +199,32 @@ class DetalleVentas(models.Model):
             if rec.cantidad and rec.precio_venta:
                 rec.update({'subtotal': rec.cantidad * rec.precio_venta})
 
-    def validate_stock(self):
+    def validate_stock(self):  # OK
         quantity_product = self.env['movimientos'].search([('producto_id', '=', self.producto_id.id)],
                                                           order='create_date DESC', limit=1).total
         if self.cantidad > quantity_product:
-            raise ValidationError(f'No existe suficiente stock de inventario para el Producto {self.producto_id.name}\n'
-                                  f'Asegúrese de tener el inventario actualizado para registrar la venta correctamente')
+            raise ValidationError(
+                f'La Cantidad solicitada para el Producto {self.producto_id.name} es de {self.cantidad} y esta excede '
+                f'su stock actual -> {self.producto_id.stock}\nAsegúrese de tener el inventario actualizado para '
+                f'registrar la venta correctamente.')
 
-    def update_validate_stock(self):
+    def update_validate_stock(self):  # OK
         movements_model = self.env['movimientos']
-        movement = movements_model.search([('detalle_venta_id', '=', self.id)])
+        current_movement = movements_model.search([('detalle_venta_ids', '=', self.id)])
         quantity_product = (movements_model.search([('producto_id', '=', self.producto_id.id)],
-                                                   order='create_date DESC', limit=2) - movement).total
+                                                   order='create_date DESC', limit=2) - current_movement).total
         if self.cantidad > quantity_product:
-            raise ValidationError(f'No existe suficiente stock de inventario para el Producto {self.producto_id.name}\n'
-                                  f'Asegúrese de tener el inventario actualizado para registrar la venta correctamente')
+            raise ValidationError(
+                f'La Cantidad solicitada para el Producto {self.producto_id.name} es de {self.cantidad} y esta excede '
+                f'su stock actual -> {self.producto_id.stock}\nAsegúrese de tener el inventario actualizado para '
+                f'registrar la venta correctamente.')
 
-    def create_movement(self):
+    def create_movement(self):  # OK
         movements_model = self.env['movimientos']
         last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)], order='create_date DESC',
                                                limit=1)
         movements_model.create({
-            'detalle_venta_id': [(4, self.id, False)],
+            'detalle_venta_ids': [(4, self.id, False)],
             'tipo': 'out',
             'user_id': self.venta_id.user_id.id,
             'fecha': datetime.datetime.now(),
@@ -229,9 +233,9 @@ class DetalleVentas(models.Model):
             'total': last_movement.total - self.cantidad,
         })
 
-    def update_movement(self):
+    def update_movement(self):  # OK
         movements_model = self.env['movimientos']
-        movement = movements_model.search([('detalle_venta_id', '=', self.id)])
+        movement = movements_model.search([('detalle_venta_ids', '=', self.id)])
         last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)],
                                                order='create_date DESC', limit=2) - movement
         movement.update({
@@ -242,13 +246,13 @@ class DetalleVentas(models.Model):
         })
 
     @api.model
-    def create(self, values):
+    def create(self, values):  # OK
         rec = super(DetalleVentas, self).create(values)
         rec.validate_stock()
         rec.create_movement()
         return rec
 
-    def write(self, values):
+    def write(self, values):  # OK
         rec = super(DetalleVentas, self).write(values)
         self.update_validate_stock()
         self.update_movement()
@@ -258,4 +262,4 @@ class DetalleVentas(models.Model):
 class Movimientos(models.Model):
     _inherit = 'movimientos'
 
-    detalle_venta_id = fields.Many2many('detalle.ventas')
+    detalle_venta_ids = fields.Many2many('detalle.ventas')

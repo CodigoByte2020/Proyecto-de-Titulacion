@@ -53,12 +53,17 @@ class CreditNote(models.Model):
                 'total': total
             })
 
+    # SEGUIR PROBANDO MÁS A FONDO ESTE MÉTODO
     def _get_ventas(self):
-        return self.env['ventas'].search([
-            ('cliente_id.numero_documento', '=', self.document_number),
-            ('fecha', 'in', self._get_range_days()),
-            ('credit_note_id', '=', False)
-        ]).sorted(key=lambda x: x.fecha, reverse=True)
+        detalle_ventas_ids = self.env['credit.note'].search(
+            [('state', 'in', (CONFIRMADO, UTILIZADO))]).detalle_ventas_ids.ids
+        ventas = self.env['detalle.ventas'].search([
+            ('id', 'not in', detalle_ventas_ids),
+            ('venta_id.cliente_id.numero_documento', '=', self.document_number),
+            ('venta_id.fecha', 'in', self._get_range_days()),
+            ('venta_id.credit_note_id', '=', False),
+        ]).venta_id.sorted(key=lambda x: x.fecha, reverse=True)
+        return ventas
 
     @staticmethod
     def _get_range_days():
@@ -100,6 +105,8 @@ class CreditNote(models.Model):
         return super(CreditNote, self).create(values)
 
     # TODO:
+    #  - ESTO SE HIZO PORQUE SE PUDO HABER CREADO 2 NOTAS DE CRÉDITO CON LAS MISMOS DETALLES DE VENTA, PERO AÚN
+    #  - ESTABAN EN ESTADO BORRADOR.
     #  - VALIDAMOS QUE UNA LÍNEA DE DETALLE DE VENTA, NO SE ENCUENTRE EN LAS LÍNEAS DE ALGUNA NOTA DE CRÉDITO EN ESTADO
     #    CONFIRMADO O UTILIZADO.
     def action_set_confirm(self):
@@ -121,7 +128,7 @@ class CreditNote(models.Model):
                                                    limit=1)
             quantity = sum(x.cantidad for x in values)
             movements_model.create({
-                'detalle_venta_id': [(4, sale_detail.id) for sale_detail in values],
+                'detalle_venta_ids': [(4, sale_detail.id) for sale_detail in values],
                 'tipo': 'in',
                 'user_id': self.user_id.id,
                 'fecha': datetime.now(),

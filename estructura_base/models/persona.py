@@ -69,7 +69,7 @@ class Persona(models.Model):
     def consult_data(self, values):
         """
         Método para consultar datos de las personas en la siguiente url https://apis.net.pe/
-        :param values: valores para consultar los datos
+        :param values: parámetros para consultar en la url
         :type values: dict
         :return: No retorna ningún valor
         :rtype: None
