@@ -18,5 +18,4 @@ class CreditNoteWizard(models.TransientModel):
             ('venta_id', 'in', self.venta_ids.ids),
             ('id', 'not in', confirmed_credit_note.detalle_ventas_ids.ids)
         ]).sorted(key=lambda x: x.venta_id.id, reverse=True)
-        credit_note_id = credit_note_model.browse(self.credit_note_id.id)
-        credit_note_id.update({'detalle_ventas_ids': [(6, 0, detalle_ventas_ids.ids)]})
+        self.credit_note_id.update({'detalle_ventas_ids': [(6, 0, detalle_ventas_ids.ids)]})

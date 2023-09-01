@@ -95,9 +95,9 @@ class Ventas(models.Model):
     #         if move.cliente_id.id != move.credit_note_id.cliente_id.id or move.credit_note_id.state != CONFIRMADO:
     #             raise ValidationError('La Nota de Crédito es incorrecta, por favor elija otra. !!!')
 
+
     # FIXME: REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO NO FUNCIONA
     #  PREGUNTAR A JUAN DIEGO
-
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         self.update({'credit_note_id': False})

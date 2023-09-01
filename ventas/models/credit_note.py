@@ -56,13 +56,13 @@ class CreditNote(models.Model):
     # SEGUIR PROBANDO MÁS A FONDO ESTE MÉTODO
     def _get_ventas(self):
         detalle_ventas_ids = self.env['credit.note'].search(
-            [('state', 'in', (CONFIRMADO, UTILIZADO))]).detalle_ventas_ids.ids
+            [('state', 'in', [CONFIRMADO, UTILIZADO])]).detalle_ventas_ids.ids
         ventas = self.env['detalle.ventas'].search([
             ('id', 'not in', detalle_ventas_ids),
             ('venta_id.cliente_id.numero_documento', '=', self.document_number),
             ('venta_id.fecha', 'in', self._get_range_days()),
             ('venta_id.credit_note_id', '=', False),
-        ]).venta_id.sorted(key=lambda x: x.fecha, reverse=True)
+        ]).mapped(lambda x: x.venta_id).sorted(key=lambda x: x.fecha, reverse=True)
         return ventas
 
     @staticmethod
