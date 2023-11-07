@@ -86,8 +86,8 @@ class Ventas(models.Model):
         for move in self:
             total = sum(move.detalle_ventas_ids.mapped('subtotal'))
             if move.total_credit_note > total:
-                raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note} y este debe ser '
-                                      f'menor o igual al total de la factura -> {total}.')
+                raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note:,.2f} y este debe ser'
+                                      f' menor o igual al total de la factura -> {total:,.2f}')
 
     # @api.constrains('credit_note_id')
     # def _check_credit_note_id(self):
@@ -95,9 +95,10 @@ class Ventas(models.Model):
     #         if move.cliente_id.id != move.credit_note_id.cliente_id.id or move.credit_note_id.state != CONFIRMADO:
     #             raise ValidationError('La Nota de Crédito es incorrecta, por favor elija otra. !!!')
 
-
-    # FIXME: REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO NO FUNCIONA
-    #  PREGUNTAR A JUAN DIEGO
+    # FIXME:
+    #  REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO
+    #  NO FUNCIONA. PREGUNTAR A JUAN DIEGO.
+    #  PARA QUE FUNCIONE EL FILTRO SIN PROBLEMA, SIEMPRE SELECCIONAR EL CLIENTE, ASÍ ESTE VALOR YA ESTE ESTABLECIDO.
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         self.update({'credit_note_id': False})
@@ -115,7 +116,7 @@ class Ventas(models.Model):
         if not self.credit_note_id:
             self.update({'total_credit_note': False})
 
-    @api.depends('detalle_ventas_ids.subtotal')
+    @api.depends('detalle_ventas_ids.subtotal', 'credit_note_id')
     def _compute_total(self):
         for move in self:
             total = sum(move.detalle_ventas_ids.mapped('subtotal'))

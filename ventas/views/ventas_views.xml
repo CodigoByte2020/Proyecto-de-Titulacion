@@ -39,7 +39,6 @@
                         <page string="Productos">
                             <field name="detalle_ventas_ids" context="{'default_venta_id': id}">
                                 <tree editable="bottom">
-                                    <field name="id"/>
                                     <field name="venta_id" invisible="1"/>
                                     <field name="currency_id" invisible="1"/>
                                     <field name="producto_id" options="{'no_create': True, 'no_open': True, 'no_edit': True}"/>
@@ -52,7 +51,7 @@
                                 <field name="credit_note_id" invisible="1"/>
                                 <field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                                <field name="total_credit_note" attrs="{'invisible': [('credit_note_id', '=', False)]}"/>
+                                <field name="total_credit_note" attrs="{'invisible': [('credit_note_id', '=', False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                     <label for="total"/>
                                 </div>
