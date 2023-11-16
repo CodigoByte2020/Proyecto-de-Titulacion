@@ -28,7 +28,6 @@ class Ventas(models.Model):
 
     # @api.model
     # def _domain_credit_note_id(self):
-    #     active_id = self.env.context.get('active_id')
     #     return []
 
     name = fields.Char(string='Número', default='/', copy=False)
@@ -48,7 +47,11 @@ class Ventas(models.Model):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, string='Moneda')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
     type_document = fields.Selection(TYPE_DOCUMENT_SELECTION, default='invoice', string='Tipo de documento')
-    credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito')
+    credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito',
+                                     domain="[('cliente_id', '=', cliente_id), ('state', '=', 'confirmed')]")
+                                     # domain=lambda self: [('cliente_id', '=', self._domain_credit_note_id()), ('state', '=', 'confirmed')])
+                                     # domain=lambda self: [('cliente_id', '=', self.cliente_id.id), ('state', '=', 'confirmed')])
+                                     # domain=_domain_credit_note_id)  REVISAR EN QUE OCASIONES ES MEJOR USAR ALGUNA DE ESTAS FORMAS
     total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento nota de crédito')
     apply_credit_note = fields.Boolean(string='¿Aplicar nota de crédito?', default=False)
 
@@ -95,16 +98,17 @@ class Ventas(models.Model):
     #         if move.cliente_id.id != move.credit_note_id.cliente_id.id or move.credit_note_id.state != CONFIRMADO:
     #             raise ValidationError('La Nota de Crédito es incorrecta, por favor elija otra. !!!')
 
-    # FIXME:
+    # FIXME: - ERROR SOLUCIONADO CON:
+    #  credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito', domain="[('cliente_id', '=', cliente_id), ('state', '=', 'confirmed')]")
     #  REVISAR PORQUE AL CREAR UNA VENTA CON UNA NOTA DE CRÉDITO, ACTUALIZAMOS EL NAVEGADOR Y LUEGO EDITAMOS, EL FILTRO
     #  NO FUNCIONA. PREGUNTAR A JUAN DIEGO.
     #  PARA QUE FUNCIONE EL FILTRO SIN PROBLEMA, SIEMPRE SELECCIONAR EL CLIENTE, ASÍ ESTE VALOR YA ESTE ESTABLECIDO.
-    @api.onchange('cliente_id')
-    def _onchange_cliente_id(self):
-        self.update({'credit_note_id': False})
-        if self.cliente_id:
-            return {'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', CONFIRMADO)]}}
-        return {'domain': {'credit_note_id': [('id', '=', -1)]}}
+    # @api.onchange('cliente_id')
+    # def _onchange_cliente_id(self):
+    #     self.update({'credit_note_id': False})
+    #     if self.cliente_id:
+    #         return {'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', CONFIRMADO)]}}
+    #     return {'domain': {'credit_note_id': [('id', '=', -1)]}}
 
     @api.onchange('apply_credit_note')
     def _onchange_apply_credit_note(self):
@@ -115,6 +119,11 @@ class Ventas(models.Model):
     def _onchange_credit_note_id(self):
         if not self.credit_note_id:
             self.update({'total_credit_note': False})
+
+    @api.onchange('cliente_id')
+    def _onchange_cliente_id(self):
+        if self.credit_note_id:
+            self.update({'credit_note_id': False})
 
     @api.depends('detalle_ventas_ids.subtotal', 'credit_note_id')
     def _compute_total(self):
