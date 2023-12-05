@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import pytz
 from odoo import api, fields, models
 
 
@@ -6,6 +9,11 @@ class Producto(models.Model):
 
     sales_price_history_ids = fields.One2many(comodel_name='sales.price.history', inverse_name='product_id')
 
+    def _get_date_current(self):
+        user_tz = self.env.user.tz or 'America/Lima'
+        timezone = pytz.timezone(user_tz)
+        return datetime.now(timezone).date()
+
     @api.model
     def create(self, values):
         rec = super(Producto, self).create(values)
@@ -13,7 +21,7 @@ class Producto(models.Model):
             'sales_price_history_ids': [(0, 0, {
                 'old_price': rec.precio_venta,
                 'new_price': rec.precio_venta,
-                'modified_date': fields.Date.today()
+                'modified_date': self._get_date_current()
             })]
         })
         return rec
@@ -25,7 +33,7 @@ class Producto(models.Model):
                 'sales_price_history_ids': [(0, 0, {
                     'old_price': self.precio_venta,
                     'new_price': precio_venta,
-                    'modified_date': fields.Date.today()
+                    'modified_date': self._get_date_current()
                 })]
             })
         return super(Producto, self).write(values)

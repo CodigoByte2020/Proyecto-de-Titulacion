@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from itertools import groupby
+
+import pytz
 from odoo.exceptions import ValidationError
 
 from odoo.addons.estructura_base.models.constantes import UTILIZADO
@@ -65,13 +67,17 @@ class CreditNote(models.Model):
         ]).mapped(lambda x: x.venta_id).sorted(key=lambda x: x.fecha, reverse=True)
         return ventas
 
-    @staticmethod
-    def _get_range_days():
-        today = datetime.date(datetime.today())
+    def _get_date_current(self):
+        user_tz = self.env.user.tz or 'America/Lima'
+        timezone = pytz.timezone(user_tz)
+        return datetime.now(timezone).date()
+
+    def _get_range_days(self):
+        current_date = self._get_date_current()
         range_date = []
         day = 0
         while len(range_date) <= 15:
-            date = today - timedelta(days=day)
+            date = current_date - timedelta(days=day)
             if int(date.strftime('%w')) in range(1, 6):
                 range_date.append(date)
             day += 1

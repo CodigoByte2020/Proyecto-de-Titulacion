@@ -34,8 +34,9 @@ class ReporteVentaWizard(models.TransientModel):
             month = f'0{month}'
         return str(month)
 
-    def _get_years(self):
-        return [(str(x), x) for x in range(fields.Date.today().year, 2020, -1)]
+    @staticmethod
+    def _get_years():
+        return [(str(year), year) for year in range(fields.Date.today().year, 2020, -1)]
 
     type_report = fields.Selection([
         ('personal', 'Por cliente'),

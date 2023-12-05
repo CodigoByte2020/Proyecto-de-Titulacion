@@ -3,7 +3,8 @@
 # 2. MÉTODO CREATE DEL REGISTRO HIJO
 # 3. MÉTODO QUE ESTA SIENDO LLAMADO
 
-import datetime
+from datetime import datetime
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.addons.estructura_base.models.constantes import (
@@ -237,7 +238,7 @@ class DetalleVentas(models.Model):
             'detalle_venta_ids': [(4, self.id, False)],
             'tipo': 'out',
             'user_id': self.venta_id.user_id.id,
-            'fecha': datetime.datetime.now(),
+            'fecha': datetime.now(),
             'producto_id': self.producto_id.id,
             'cantidad': self.cantidad,
             'total': last_movement.total - self.cantidad,
@@ -249,7 +250,7 @@ class DetalleVentas(models.Model):
         last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)],
                                                order='create_date DESC', limit=2) - movement
         movement.update({
-            'fecha': datetime.datetime.now(),
+            'fecha': datetime.now(),
             'producto_id': self.producto_id,
             'cantidad': self.cantidad,
             'total': last_movement.total - self.cantidad
