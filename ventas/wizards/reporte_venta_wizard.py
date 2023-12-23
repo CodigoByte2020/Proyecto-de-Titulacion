@@ -1,6 +1,9 @@
+import base64
+import io
 from datetime import datetime, date
 
 import pytz
+import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 from odoo import fields, models
@@ -60,20 +63,51 @@ class ReporteVentaWizard(models.TransientModel):
         self.report_number += 1
         return self.report_number
 
-    def reporte_venta_pdf(self):
+    def _get_sales_detail(self):
         detalle_ventas_model = self.env['detalle.ventas']
         domain = []
         if self.type_report == 'personal':
-            domain += [('venta_id.cliente_id.numero_documento', '=', self.document_number)]
+            domain.extend([('venta_id.cliente_id.numero_documento', '=', self.document_number)])
         if self.range == 'dates':
-            domain += [
+            domain.extend([
                 ('venta_id.fecha', '>=', self.date_from),
                 ('venta_id.fecha', '<=', self.date_to)
-            ]
+            ])
             return detalle_ventas_model.search(domain)
         else:
             return detalle_ventas_model.search(domain).filtered(
                 lambda x: x.venta_id.fecha.month == int(self.month) and x.venta_id.fecha.year == int(self.year))
+
+    def xlsx_sale_report(self):
+        sales_detail = self._get_sales_detail()
+        data = [{
+            'user_id': line.venta_id.user_id.name,
+            'tipo_venta': line.venta_id.tipo_venta,
+            'fecha': line.venta_id.fecha,
+            'product_id': line.producto_id.name,
+            'cantidad': line.cantidad,
+            'precio_venta': line.precio_venta,
+            'subtotal': line.subtotal
+        } for line in sales_detail]
+        # CREANDO DATAFRAMES PARA PANDAS
+        df = pd.DataFrame(data)
+        # CONVERTIR A EXCEL EN MEMORIA
+        xlsx_bytes = io.BytesIO()
+        df.to_excel(xlsx_bytes, index=False)
+        xlsx_bytes.seek(0)
+        xls_data = xlsx_bytes.getvalue()
+        result = base64.b64encode(xls_data)
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        attachment = self.env['ir.attachment'].create({
+            'name': 'Reporte XLSX de Venta',
+            'datas': result
+        })
+        download_url = '/web/content/' + str(attachment.id) + '?download=true'
+        return {
+            "type": "ir.actions.act_url",
+            "url": str(base_url) + str(download_url),
+            "target": "new",
+        }
 
     # FIXME:
     #   - Falta en el reporte cuando es todos los clientes

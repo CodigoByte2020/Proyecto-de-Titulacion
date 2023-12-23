@@ -20,6 +20,13 @@
         <field name="model">ventas</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_set_confirm" type="object" string="Confirmar" class="btn btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'pending')]}"/>
+                    <button name="action_set_cancel" type="object" string="Cancelar" class="btn btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed,cancelled"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -31,8 +38,8 @@
                         </group>
                         <group>
                             <field name="fecha"/>
-                            <field name="apply_credit_note" widget="boolean_toggle"/>
-                            <field name="credit_note_id" options="{'no_create': True, 'no_edit': True}" attrs="{'invisible': [('apply_credit_note', '=', False)]}"/>
+<!--                            <field name="apply_credit_note" widget="boolean_toggle"/>-->
+<!--                            <field name="credit_note_id" options="{'no_create': True, 'no_edit': True}" attrs="{'invisible': [('apply_credit_note', '=', False)]}"/>-->
                         </group>
                     </group>
                     <notebook>
@@ -48,10 +55,10 @@
                                 </tree>
                             </field>
                             <group class="oe_subtotal_footer">
-                                <field name="credit_note_id" invisible="1"/>
+<!--                                <field name="credit_note_id" invisible="1"/>-->
                                 <field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                                 <field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                                <field name="total_credit_note" attrs="{'invisible': [('credit_note_id', '=', False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+<!--                                <field name="total_credit_note" attrs="{'invisible': [('credit_note_id', '=', False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>-->
                                 <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                     <label for="total"/>
                                 </div>

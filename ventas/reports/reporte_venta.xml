@@ -50,7 +50,7 @@
                                         <strong>SUBTOTAL</strong>
                                     </th>
                                 </tr>
-                                <t t-set="lines" t-value="o.reporte_venta_pdf()"/>
+                                <t t-set="lines" t-value="o._get_sales_detail()"/>
                                 <t t-set="count" t-value="1"/>
                                 <t t-foreach="lines" t-as="line">
                                     <t t-if="count % 2 == 0">

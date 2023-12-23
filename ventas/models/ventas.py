@@ -4,12 +4,16 @@
 # 3. MÉTODO QUE ESTA SIENDO LLAMADO
 
 from datetime import datetime
+from itertools import groupby
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.addons.estructura_base.models.constantes import (
     CONFIRMADO,
-    UTILIZADO
+    PENDIENTE,
+    UTILIZADO,
+    CANCELADO,
+    STATE_SELECTION
 )
 
 TIPO_VENTA_SELECTION = [
@@ -26,10 +30,6 @@ TYPE_DOCUMENT_SELECTION = [
 class Ventas(models.Model):
     _name = 'ventas'
     _description = 'Registro de ventas'
-
-    # @api.model
-    # def _domain_credit_note_id(self):
-    #     return []
 
     name = fields.Char(string='Número', default='/', copy=False)
     cliente_id = fields.Many2one('base.persona', string='Cliente', required=True, domain=[('rango_cliente', '=', 1)])
@@ -48,13 +48,14 @@ class Ventas(models.Model):
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, string='Moneda')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, string='Compañía')
     type_document = fields.Selection(TYPE_DOCUMENT_SELECTION, default='invoice', string='Tipo de documento')
-    credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito',
-                                     domain="[('cliente_id', '=', cliente_id), ('state', '=', 'confirmed')]")
+    state = fields.Selection(STATE_SELECTION, default=PENDIENTE, string='Estado')
+    # credit_note_id = fields.Many2one('credit.note', string='Nota de Crédito',
+    #                                  domain="[('cliente_id', '=', cliente_id), ('state', '=', 'confirmed')]")
                                      # domain=lambda self: [('cliente_id', '=', self._domain_credit_note_id()), ('state', '=', 'confirmed')])
                                      # domain=lambda self: [('cliente_id', '=', self.cliente_id.id), ('state', '=', 'confirmed')])
                                      # domain=_domain_credit_note_id)  REVISAR EN QUE OCASIONES ES MEJOR USAR ALGUNA DE ESTAS FORMAS
-    total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento nota de crédito')
-    apply_credit_note = fields.Boolean(string='¿Aplicar nota de crédito?', default=False)
+    # total_credit_note = fields.Float(related='credit_note_id.total', store=True, string='Descuento nota de crédito')
+    # apply_credit_note = fields.Boolean(string='¿Aplicar nota de crédito?', default=False)
 
     # Crea un registro de movimiento de crédito de cliente por venta.
     # def action_set_confirm(self):
@@ -85,13 +86,13 @@ class Ventas(models.Model):
                 if not credito:
                     raise ValidationError(f'El cliente {rec.cliente_id.name} no tiene ningun crédito registrado.')
 
-    @api.constrains('total_credit_note')
-    def _check_total_credit_note(self):
-        for move in self:
-            total = sum(move.detalle_ventas_ids.mapped('subtotal'))
-            if move.total_credit_note > total:
-                raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note:,.2f} y este debe ser'
-                                      f' menor o igual al total de la factura -> {total:,.2f}')
+    # @api.constrains('total_credit_note')
+    # def _check_total_credit_note(self):
+    #     for move in self:
+    #         total = sum(move.detalle_ventas_ids.mapped('subtotal'))
+    #         if move.total_credit_note > total:
+    #             raise ValidationError(f'El monto de la Nota de Crédito es {move.total_credit_note:,.2f} y este debe ser'
+    #                                   f' menor o igual al total de la factura -> {total:,.2f}')
 
     # @api.constrains('credit_note_id')
     # def _check_credit_note_id(self):
@@ -111,22 +112,23 @@ class Ventas(models.Model):
     #         return {'domain': {'credit_note_id': [('cliente_id', '=', self.cliente_id.id), ('state', '=', CONFIRMADO)]}}
     #     return {'domain': {'credit_note_id': [('id', '=', -1)]}}
 
-    @api.onchange('apply_credit_note')
-    def _onchange_apply_credit_note(self):
-        if not self.apply_credit_note:
-            self.update({'credit_note_id': False})
+    # @api.onchange('apply_credit_note')
+    # def _onchange_apply_credit_note(self):
+    #     if not self.apply_credit_note:
+    #         self.update({'credit_note_id': False})
+    #
+    # @api.onchange('credit_note_id')
+    # def _onchange_credit_note_id(self):
+    #     if not self.credit_note_id:
+    #         self.update({'total_credit_note': False})
+    #
+    # @api.onchange('cliente_id')
+    # def _onchange_cliente_id(self):
+    #     if self.credit_note_id:
+    #         self.update({'credit_note_id': False})
 
-    @api.onchange('credit_note_id')
-    def _onchange_credit_note_id(self):
-        if not self.credit_note_id:
-            self.update({'total_credit_note': False})
-
-    @api.onchange('cliente_id')
-    def _onchange_cliente_id(self):
-        if self.credit_note_id:
-            self.update({'credit_note_id': False})
-
-    @api.depends('detalle_ventas_ids.subtotal', 'credit_note_id')
+    # @api.depends('detalle_ventas_ids.subtotal', 'credit_note_id')
+    @api.depends('detalle_ventas_ids.subtotal')
     def _compute_total(self):
         for move in self:
             total = sum(move.detalle_ventas_ids.mapped('subtotal'))
@@ -134,13 +136,22 @@ class Ventas(models.Model):
             move.update({
                 'amount_untaxed': total - amount_tax,
                 'amount_tax': amount_tax,
-                'total': total - self.total_credit_note
+                # 'total': total - self.total_credit_note
+                'total': total
             })
 
-    def _set_credit_note_state(self, values):
-        credit_note_id = self.env['credit.note'].browse(values.get('credit_note_id'))
-        if credit_note_id:
-            credit_note_id.update({'state': UTILIZADO})
+    # def _set_credit_note_state(self, values):
+    #     credit_note_id = self.env['credit.note'].browse(values.get('credit_note_id'))
+    #     if credit_note_id:
+    #         credit_note_id.update({'state': UTILIZADO})
+
+    def action_set_confirm(self):
+        self.detalle_ventas_ids.mapped(lambda record: record.action_set_confirm())
+        self.write({'state': CONFIRMADO})
+
+    def action_set_cancel(self):
+        self.detalle_ventas_ids.mapped(lambda record: record.action_set_cancel())
+        self.write({'state': CANCELADO})
 
     # FIXME: REVISAR ESTOS MÉTODOS AL CREAR UNA VENTA (CREATE Y WRITE)
     @api.model
@@ -152,14 +163,14 @@ class Ventas(models.Model):
                     self._name, sequence_date=None) or '/'
             else:
                 values['name'] = self.env['ir.sequence'].next_by_code(self._name, sequence_date=None) or '/'
-        self._set_credit_note_state(values)
+        # self._set_credit_note_state(values)
         return super(Ventas, self).create(values)
 
-    def write(self, values):
-        self._set_credit_note_state(values)
-        if self.credit_note_id:
-            self.credit_note_id.update({'state': CONFIRMADO})
-        return super(Ventas, self).write(values)
+    # def write(self, values):
+    #     self._set_credit_note_state(values)
+    #     if self.credit_note_id:
+    #         self.credit_note_id.update({'state': CONFIRMADO})
+    #     return super(Ventas, self).write(values)
 
     # @api.model
     # def model_function(self):
@@ -193,7 +204,7 @@ class DetalleVentas(models.Model):
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one(related='venta_id.currency_id')
     name_venta = fields.Char(related='venta_id.name')
-    credit_note_id = fields.Many2one('credit.note', related='venta_id.credit_note_id')
+    # credit_note_id = fields.Many2one('credit.note', related='venta_id.credit_note_id')
 
     @api.depends('producto_id')
     def _compute_precio_venta(self):
@@ -212,7 +223,7 @@ class DetalleVentas(models.Model):
 
     def validate_stock(self):  # OK
         quantity_product = self.env['movimientos'].search([('producto_id', '=', self.producto_id.id)],
-                                                          order='create_date DESC', limit=1).total
+                                                          order='id DESC', limit=1).total
         if self.cantidad > quantity_product:
             raise ValidationError(
                 f'La Cantidad solicitada para el Producto {self.producto_id.name} es de {self.cantidad} y esta excede '
@@ -232,8 +243,7 @@ class DetalleVentas(models.Model):
 
     def create_movement(self):  # OK
         movements_model = self.env['movimientos']
-        last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)], order='create_date DESC',
-                                               limit=1)
+        last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)], order='id DESC', limit=1)
         movements_model.create({
             'detalle_venta_ids': [(4, self.id, False)],
             'tipo': 'out',
@@ -256,18 +266,38 @@ class DetalleVentas(models.Model):
             'total': last_movement.total - self.cantidad
         })
 
-    @api.model
-    def create(self, values):  # OK
-        rec = super(DetalleVentas, self).create(values)
-        rec.validate_stock()
-        rec.create_movement()
-        return rec
+    def action_set_confirm(self):
+        self.ensure_one()
+        self.validate_stock()
+        self.create_movement()
 
-    def write(self, values):  # OK
-        rec = super(DetalleVentas, self).write(values)
-        self.update_validate_stock()
-        self.update_movement()
-        return rec
+    def action_set_cancel(self):
+        self.ensure_one()
+        movements_model = self.env['movimientos']
+        last_movement = movements_model.search([('producto_id', '=', self.producto_id.id)], order='id DESC',
+                                               limit=1)
+        movements_model.create({
+            'detalle_venta_ids': [(4, self.id), False],
+            'tipo': 'in',
+            'user_id': self.venta_id.user_id.id,
+            'fecha': datetime.now(),
+            'producto_id': self.producto_id.id,
+            'cantidad': self.cantidad,
+            'total': last_movement.total + self.cantidad,
+        })
+
+    # @api.model
+    # def create(self, values):  # OK
+    #     rec = super(DetalleVentas, self).create(values)
+    #     rec.validate_stock()
+    #     rec.create_movement()
+    #     return rec
+    #
+    # def write(self, values):  # OK
+    #     rec = super(DetalleVentas, self).write(values)
+    #     self.update_validate_stock()
+    #     self.update_movement()
+    #     return rec
 
 
 class Movimientos(models.Model):

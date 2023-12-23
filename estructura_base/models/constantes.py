@@ -7,7 +7,8 @@ CANCELADO = 'cancelled'
 STATE_SELECTION = [
     (BORRADOR, 'Borrador'),
     (PENDIENTE, 'Pendiente'),
-    (CONFIRMADO, 'Confirmado')
+    (CONFIRMADO, 'Confirmado'),
+    (CANCELADO, 'Cancelado')
 ]
 
 STATE_NOTE_SELECTION = [
