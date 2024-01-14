@@ -1,6 +1,7 @@
 import base64
 import io
 from datetime import datetime, date
+from itertools import groupby
 
 import pytz
 import pandas as pd
@@ -65,20 +66,29 @@ class ReporteVentaWizard(models.TransientModel):
 
     def _get_sales_detail(self):
         detalle_ventas_model = self.env['detalle.ventas']
-        domain = []
+        domain, sales_detail = [], []
         if self.type_report == 'personal':
             domain.extend([('venta_id.cliente_id.numero_documento', '=', self.document_number)])
         if self.range == 'dates':
-            domain.extend([
-                ('venta_id.fecha', '>=', self.date_from),
-                ('venta_id.fecha', '<=', self.date_to)
-            ])
-            return detalle_ventas_model.search(domain)
-        else:
-            return detalle_ventas_model.search(domain).filtered(
+            domain.extend([('venta_id.fecha', '>=', self.date_from), ('venta_id.fecha', '<=', self.date_to)])
+            sales_detail = detalle_ventas_model.search(domain)
+        elif self.range == 'month':
+            sales_detail = detalle_ventas_model.search(domain).filtered(
                 lambda x: x.venta_id.fecha.month == int(self.month) and x.venta_id.fecha.year == int(self.year))
+        sorted_sales_detail = sales_detail.sorted(key=lambda x: x.venta_id.cliente_id.name)
+        grouped_sales_detail = [{key: list(group)} for key, group in
+                                groupby(sorted_sales_detail, key=lambda x: x.venta_id.cliente_id.name)]
+        return grouped_sales_detail
 
-    def xlsx_sale_report(self):
+    @staticmethod
+    def _get_totals(sales_detail):
+        total = sum(map(lambda x: x.subtotal, sales_detail))
+        amount_tax = total * 0.18
+        subtotal = total - amount_tax
+        return {'total': total, 'amount_tax': amount_tax, 'subtotal': subtotal}
+
+    # FIXME: REVISAR ESTE MÉTODO
+    def xlsx_sale_repor(self):
         sales_detail = self._get_sales_detail()
         data = [{
             'user_id': line.venta_id.user_id.name,
@@ -109,6 +119,51 @@ class ReporteVentaWizard(models.TransientModel):
             "target": "new",
         }
 
-    # FIXME:
-    #   - Falta en el reporte cuando es todos los clientes
-    #   - Indicar el cliente
+    def xlsx_sale_report(self):
+        sales_details = self._get_sales_detail()
+        # CREAR UN ESCRITOR EXCEL
+        # xlsx_bytes = io.BytesIO()
+        with pd.ExcelWriter('reporte_ventas.xlsx', engine='xlsxwriter') as excel_writer:
+            for sales_detail in sales_details:
+                client_name = list(sales_detail.keys())[0]
+                client_values = list(sales_detail.values())[0]
+                data = [{
+                    'user_id': line.venta_id.user_id.name,
+                    'tipo_venta': line.venta_id.tipo_venta,
+                    'fecha': line.venta_id.fecha,
+                    'product_id': line.producto_id.name,
+                    'cantidad': line.cantidad,
+                    'precio_venta': line.precio_venta,
+                    'subtotal': line.subtotal
+                } for line in client_values]
+                # CREAR DATAFRAMES PARA PANDAS
+                df = pd.DataFrame(data)
+                # ESCRIBIR EL DATAFRAME EN EL EXCEL EN MEMORIA
+                # df.to_excel(excel_writer, sheet_name=client_name, index=False)
+                xlsx_bytes = io.BytesIO()
+                df.to_excel(xlsx_bytes, sheet_name=client_name, index=False)
+                print('V')
+
+        # OBTENER LOS DATOS DEL EXCEL EN MEMORIA
+        # xlsx_bytes = io.BytesIO()
+        xlsx_bytes.seek(0)
+        xls_data = xlsx_bytes.getvalue()  # FIXME: ERROR
+        # CONVERTIR LOS DATOS A BASE64 PARA ALMACENARLO EN UN ARCHIVO DE IR.ATTACHMENT
+        result = base64.b64encode(xls_data)
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+
+        # GUARDAR EL ARCHIVO EN IR.ATTACHMENT
+        attachment = self.env['ir.attachment'].create({
+            'name': 'Reporte XLSX de Venta',
+            'datas': result
+        })
+
+        # OBTENER LA URL DE DESCARGA DEL ARCHIVO
+        download_url = '/web/content/' + str(attachment.id) + '?download=true'
+
+        # REDIRECCIONAR AL USUARIO A LA URL DE DESCARGA
+        return {
+            "type": "ir.actions.act_url",
+            "url": str(base_url) + str(download_url),
+            "target": "new",
+        }

@@ -75,10 +75,6 @@
                                         <td class="text-right" style="border-left: solid black 1px;">IGV 18%</td>
                                         <td class="text-right" style="border-right: solid black 1px;"><span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                     </tr>
-                                   <tr t-if="o.total_credit_note">
-                                        <td class="text-right" style="border-left: solid black 1px;">Descuento nota de crédito</td>
-                                        <td class="text-right" style="border-right: solid black 1px;"><span t-field="o.total_credit_note" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
-                                    </tr>
                                     <tr>
                                         <td class="text-right" style="border-left: solid black 1px; border-bottom: solid black 1px;">Importe Total</td>
                                         <td class="text-right" style="border-right: solid black 1px; border-bottom: solid black 1px;"><span t-field="o.total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
