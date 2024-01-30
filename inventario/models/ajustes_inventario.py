@@ -74,5 +74,7 @@ class DetalleAjustesInventario(models.Model):
     @api.constrains('cantidad')
     def _check_cantidad(self):
         for rec in self:
-            if rec.cantidad > 100:
-                raise ValidationError('La Cantidad ha excedido el límite !!!')
+            if rec.cantidad < 0:
+                raise ValidationError('La Cantidad debe se mayor a 0 !!!')
+            elif rec.cantidad > 100:
+                raise ValidationError('La Cantidad máxima permitida es 100 unidades !!!')
